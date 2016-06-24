@@ -1,0 +1,7 @@
+{
+  "dependencies": {},
+  "globalDependencies": {
+    "argparse": "registry:dt/argparse#1.0.3+20160316155526",
+    "node": "registry:env/node#4.0.0+20160507210304"
+  }
+}

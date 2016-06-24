@@ -1,0 +1,23 @@
+{
+  "name": "typedsequelize",
+  "version": "1.0.0",
+  "description": "typescript source generator for sequelize &amp; rpc",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Perlmint/TypedSequelize.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Perlmint/TypedSequelize/issues"
+  },
+  "homepage": "https://github.com/Perlmint/TypedSequelize#readme",
+  "dependencies": {
+    "argparse": "^1.0.7",
+    "reflect-metadata": "^0.1.3"
+  }
+}
