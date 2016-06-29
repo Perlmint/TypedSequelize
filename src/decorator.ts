@@ -49,6 +49,13 @@ export enum DBTypes {
     Geometry
 }
 
+export const DefaultDBType: Map<string, DBTypes> = new Map([
+    ["string", DBTypes.Varchar],
+    ["number", DBTypes.Int],
+    ["Date", DBTypes.Datetime],
+    ["Buffer", DBTypes.Blob]
+]);
+
 export var SequelizeMap: {[key:number]:string} = (() => {
     let ret: {[key:number]:string} = {};
 

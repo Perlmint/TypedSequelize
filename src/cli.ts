@@ -1,9 +1,12 @@
 /// <reference path="../typings/index.d.ts" />
 
-import {readFileSync} from "fs";
+import {readFileSync, createWriteStream, mkdirSync, accessSync} from "fs";
+import {basename, join, relative} from "path";
 import * as ts from "typescript";
 import {ArgumentParser} from "argparse";
-import {DBTypes, SequelizeMap} from "./decorator";
+import {DBTypes, SequelizeMap, DefaultDBType} from "./decorator";
+import * as _ from "lodash";
+import {sprintf} from "sprintf-js";
 
 var parser = new ArgumentParser({
     version: "DEV_VERSION",
@@ -15,6 +18,13 @@ parser.addArgument(
     {
         type: "string",
         help: "output directory"
+    }
+);
+parser.addArgument(
+    ["rootdir"],
+    {
+        type: "string",
+        help: "output root directory for typescript reference"
     }
 );
 parser.addArgument(
@@ -55,7 +65,9 @@ parser.addArgument(
 
 interface Property {
     name: string
-    type: ts.TypeNode
+    tsType: string,
+    internal: boolean,
+    concretType: string
 }
 type InterfaceMap = ts.Map<{
     name: string,
@@ -130,7 +142,11 @@ function parse(fileName: string) {
                     console.log(prop.type);
                 }
                 if (concretType == null) {
-                    
+                    if (DefaultDBType.has(prop_type)) {
+                        concretType = DBTypes[DefaultDBType.get(prop_type)];
+                    }
+                    else {
+                    }
                 }
                 members.push({
                     name: prop.name.getText(),
@@ -139,7 +155,6 @@ function parse(fileName: string) {
                     concretType: concretType
                 });
             });
-            console.log(members);
             interfaces[decl.name.text] = {
                 name: decl.name.text,
                 properties: members
@@ -157,7 +172,36 @@ var args = parser.parseArgs();
 if (args.watch) {
     watch(args.inputs, {});
 } else {
+    var interfaces: InterfaceMap = {};
+    var interfacesByFile: ts.Map<InterfaceMap> = {};
     (<string[]>args.inputs).forEach((v, i) => {
-        parse(v);
+        let parsed = parse(v);
+        _.assign(interfaces, parsed);
+        interfacesByFile[v] = parsed
+    });
+    try {
+        mkdirSync(args.outdir);
+    }
+    catch (e) {
+    }
+    _.forEach(interfacesByFile, (v, k) => {
+        let basefilename = basename(k, '.ts');
+        let outfilename = basefilename + '_models.ts';
+        var stream = createWriteStream(join(args.outdir, outfilename));
+        stream.write(sprintf("/// <reference path=\"%s/index.d.ts\" />\n\n",
+                             relative(outfilename, join(args.rootdir, "typings"))));
+        stream.write("import * as sequelize from 'sequelize';\n\n");
+        _.forEach(v, (interf, name) => {
+            stream.write(sprintf("export interface %sInterface {\n", name));
+            _.forEach(interf.properties, (prop) => {
+                if (prop.internal) {
+                    return;
+                }
+                stream.write(sprintf("    %s?: %s;\n", prop.name, prop.tsType));
+            });
+            stream.write("}\n\n");
+            stream.write(sprintf("export interface %sInstance extends sequelize.Instance<%sInstance, %sInterface>, %sInterface {}\n\n", name, name, name, name));
+            stream.write(sprintf("export interface %sModel extends sequelize.Model<%sInstance, %sInterface> {}", name, name, name));
+        });
     });
 }

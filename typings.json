@@ -2,6 +2,8 @@
   "dependencies": {},
   "globalDependencies": {
     "argparse": "registry:dt/argparse#1.0.3+20160316155526",
-    "node": "registry:env/node#4.0.0+20160507210304"
+    "lodash": "registry:dt/lodash#3.10.0+20160619033623",
+    "node": "registry:env/node#4.0.0+20160507210304",
+    "sprintf-js": "registry:dt/sprintf-js#0.0.0+20160317120654"
   }
 }
