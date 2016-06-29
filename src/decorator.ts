@@ -65,20 +65,20 @@ export var SequelizeMap: {[key:number]:string} = (() => {
     ret[DBTypes.Int] = 'INTEGER';
     ret[DBTypes.Integer] = 'INTEGER';
     ret[DBTypes.Mediumint] = 'INTEGER';
-    ret[DBTypes.Bigint] = 'INTEGER';
+    ret[DBTypes.Bigint] = 'BIGINT';
     ret[DBTypes.Year] = 'INTEGER';
 
-    ret[DBTypes.Float] = 'DECIMAL';
-    ret[DBTypes.Double] = 'DECIMAL';
+    ret[DBTypes.Float] = 'FLOAT';
+    ret[DBTypes.Double] = 'REAL';
     ret[DBTypes.Decimal] = 'DECIMAL';
 
     ret[DBTypes.Timestamp] = 'DATE';
     ret[DBTypes.Date] = 'DATE';
     ret[DBTypes.Datetime] = 'DATE';
 
-    ret[DBTypes.Tinyblob] = 'BLOB';
-    ret[DBTypes.Mediumblob] = 'BLOB';
-    ret[DBTypes.Longblob] = 'BLOB';
+    ret[DBTypes.Tinyblob] = 'BLOB(\'tiny\')';
+    ret[DBTypes.Mediumblob] = 'BLOB(\'medium\')';
+    ret[DBTypes.Longblob] = 'BLOB(\'long\')';
     ret[DBTypes.Blob] = 'BLOB';
     ret[DBTypes.Binary] = 'BLOB';
     ret[DBTypes.Varbinary] = 'BLOB';
@@ -86,14 +86,14 @@ export var SequelizeMap: {[key:number]:string} = (() => {
 
     ret[DBTypes.Char] = 'STRING';
     ret[DBTypes.Varchar] = 'STRING';
-    ret[DBTypes.Tinytext] = 'STRING';
-    ret[DBTypes.Mediumtext] = 'STRING';
-    ret[DBTypes.Longtext] = 'STRING';
-    ret[DBTypes.Text] = 'STRING';
+    ret[DBTypes.Tinytext] = 'TEXT(\'tiny\')';
+    ret[DBTypes.Mediumtext] = 'TEXT(\'medium\')';
+    ret[DBTypes.Longtext] = 'TEXT(\'long\')';
+    ret[DBTypes.Text] = 'TEXT';
     ret[DBTypes.Enum] = 'STRING';
     ret[DBTypes.Set] = 'STRING';
     ret[DBTypes.Time] = 'STRING';
-    ret[DBTypes.Geometry] = 'STRING';
+    ret[DBTypes.Geometry] = 'GEOMETRY';
 
     return ret;
 })();
