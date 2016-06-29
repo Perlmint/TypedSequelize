@@ -67,7 +67,7 @@ interface Property {
     name: string
     tsType: string,
     internal: boolean,
-    concretType: string
+    concretType: DBTypes
 }
 type InterfaceMap = ts.Map<{
     name: string,
@@ -114,7 +114,7 @@ function parse(fileName: string) {
                             isInternal = true;
                             break;
                         case 'concretType':
-                            concretType = (<ts.PropertyAccessExpression>args[0]).name.text;
+                            concretType = DBTypes[(<ts.PropertyAccessExpression>args[0]).name.text];
                             break;
                         }
                     });
@@ -143,7 +143,7 @@ function parse(fileName: string) {
                 }
                 if (concretType == null) {
                     if (DefaultDBType.has(prop_type)) {
-                        concretType = DBTypes[DefaultDBType.get(prop_type)];
+                        concretType = DefaultDBType.get(prop_type);
                     }
                     else {
                     }
@@ -192,16 +192,35 @@ if (args.watch) {
                              relative(outfilename, join(args.rootdir, "typings"))));
         stream.write("import * as sequelize from 'sequelize';\n\n");
         _.forEach(v, (interf, name) => {
-            stream.write(sprintf("export interface %sInterface {\n", name));
+            stream.write(sprintf("interface %sInterface {\n", name));
             _.forEach(interf.properties, (prop) => {
-                if (prop.internal) {
-                    return;
-                }
                 stream.write(sprintf("    %s?: %s;\n", prop.name, prop.tsType));
             });
             stream.write("}\n\n");
-            stream.write(sprintf("export interface %sInstance extends sequelize.Instance<%sInstance, %sInterface>, %sInterface {}\n\n", name, name, name, name));
-            stream.write(sprintf("export interface %sModel extends sequelize.Model<%sInstance, %sInterface> {}", name, name, name));
+            stream.write(sprintf("interface %sInstance extends sequelize.Instance<%sInstance, %sInterface>, %sInterface {}\n\n", name, name, name, name));
+            stream.write(sprintf("interface %sModel extends sequelize.Model<%sInstance, %sInterface> {}\n\n", name, name, name));
+            stream.write(sprintf("var %sInitialized: boolean = false;\n", name));
+            stream.write(sprintf("export var %s: %sModel;\n", name, name));
+            stream.write(sprintf(`export function init%s(seq: sequelize.Sequelize): void {
+  if (%sInitialized) {
+    return;
+  }
+
+`, name, name))
+            stream.write(sprintf("  %s = <%sModel>sequelize.define<%sInstance, %sInterface>('%s', {\n", name, name, name, name, name));
+            stream.write(
+                _.map(interf.properties, (prop) => {
+                    return sprintf("    '%s': sequelize.%s", prop.name, SequelizeMap[prop.concretType])
+                }).join(',\n'));
+            stream.write("\n");
+            stream.write("  });\n\n");
+            stream.write(sprintf(`  %sInitialized = true;
+}`, name));
         });
+        stream.write("\n\nexport function init(seq: sequelize.Sequelize): void {\n");
+        _.forEach(v, (interf, name) => {
+            stream.write(sprintf("  init%s(seq);\n", name));
+        });
+        stream.write("};");
     });
 }
