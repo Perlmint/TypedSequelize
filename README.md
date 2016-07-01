@@ -22,7 +22,7 @@ run bin/cli.js
 Now you can use **Person** in **src/gen/person_models**.
 
 ### Decorators
-- concreatType()
+- concreteType()
     - Specify Sequelize Type
 - embededField()
     - Each fields are saved into seperated fields.

@@ -56,7 +56,7 @@ export function parse(fileName: string): ParsedInfo {
 
     function parseDecorators(decorators: ts.NodeArray<ts.Decorator>): PropertyOption {
         let ret: PropertyOption = {
-            concretType: null,
+            concreteType: null,
             embeded: null,
             internal: false,
             primaryKey: false,
@@ -83,8 +83,8 @@ export function parse(fileName: string): ParsedInfo {
             case 'internal':
                 ret.internal = true;
                 break;
-            case 'concretType':
-                ret.concretType = DBTypes[(<ts.PropertyAccessExpression>args[0]).name.text];
+            case 'concreteType':
+                ret.concreteType = DBTypes[(<ts.PropertyAccessExpression>args[0]).name.text];
                 break;
             case 'embededField':
                 ret.embeded = [];
@@ -102,7 +102,7 @@ export function parse(fileName: string): ParsedInfo {
 
     function parseProperty(decl: ts.PropertyDeclaration): [PropertyOption, ts.Type] {
         let ret: PropertyOption = {
-            concretType: null,
+            concreteType: null,
             embeded: null,
             internal: false,
             primaryKey: false,
@@ -120,10 +120,10 @@ export function parse(fileName: string): ParsedInfo {
         }
         Object.assign(ret, parseDecorators(decorators));
 
-        // fill concretType
-        if (ret.concretType == null) {
+        // fill concreteType
+        if (ret.concreteType == null) {
             if (DefaultDBType.has(tsType)) {
-                ret.concretType = DefaultDBType.get(tsType);
+                ret.concreteType = DefaultDBType.get(tsType);
             }
             else if (ret.embeded != null) {
                 for (var embededProp of typeChecker.getPropertiesOfType(propType)) {

@@ -21,11 +21,11 @@ function makeProperty(prop: Property, prefix: string = ""): string {
     let name = prefix + prop.name;
     let propDef = sprintf(`    '%s': {
       type: sequelize.`, name);
-    let getter: string = null, setter: string = null, concreatType: string;
+    let getter: string = null, setter: string = null, concreteType: string;
     if (prop.option.embeded !== null) {
         propDef = _.map(prop.option.embeded,
                         (embeded) => makeProperty(embeded, name)).concat(propDef).join(",\n");
-        concreatType = "VIRTUAL";
+        concreteType = "VIRTUAL";
         getter = "        return {\n" +_.map(prop.option.embeded,
                        (embeded) =>
                        sprintf("          '%s': this.get('%s_%s')",
@@ -40,15 +40,15 @@ function makeProperty(prop: Property, prefix: string = ""): string {
                                embeded.name)).join('\n');
     }
     else if (prop.option.arrayJoinedWith !== null) {
-        concreatType = "STRING";
+        concreteType = "STRING";
         getter = sprintf("        return (<string>this.getDataValue('%s') || '').split('%s');",
                          name, prop.option.arrayJoinedWith);
         setter = sprintf("        this.setDataValue('%s', val.join('%s'));", name, prop.option.arrayJoinedWith);
     }
     else {
-        concreatType = SequelizeMap[prop.option.concretType];
+        concreteType = SequelizeMap[prop.option.concreteType];
     }
-    propDef += concreatType;
+    propDef += concreteType;
     if (prop.option.primaryKey) {
         propDef += ",\n      primaryKey: true";
     }

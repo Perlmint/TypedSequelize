@@ -4,7 +4,7 @@ import {DBTypes} from "./decorator";
 
 export interface PropertyOption {
     internal: boolean;
-    concretType?: DBTypes;
+    concreteType?: DBTypes;
     embeded: Property[];
     primaryKey: boolean;
     arrayJoinedWith?: string;
@@ -26,6 +26,5 @@ export type InterfaceMap = ts.Map<Interface>;
 
 export type ParsedInfo = {
     interfaces: InterfaceMap;
-    indecies: ts.Map<string[]>;
     imports: ts.Map<string[]>;
 };
