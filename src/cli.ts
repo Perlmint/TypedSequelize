@@ -323,12 +323,12 @@ if (args.watch) {
                     else {
                         let def = sprintf(`    '%s': {
       type: sequelize.VIRTUAL,
-      get: (): %s => {
+      get: function(): %s {
         return {
 %s
         };
       },
-      set: (val: %s) => {
+      set: function(val: %s) {
 %s
       }
 }`, prop.name, tsTypeToString(prop.tsType),
