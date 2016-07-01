@@ -21,36 +21,50 @@ function makeProperty(prop: Property, prefix: string = ""): string {
     let name = prefix + prop.name;
     let propDef = sprintf(`    '%s': {
       type: sequelize.`, name);
-    if (prop.option.embeded === null) {
-        propDef += SequelizeMap[prop.option.concretType];
-        if (prop.option.primaryKey) {
-            propDef += ",\n      primaryKey: true";
-        }
-        return propDef + "\n    }";
+    let getter: string = null, setter: string = null, concreatType: string;
+    if (prop.option.embeded !== null) {
+        propDef = _.map(prop.option.embeded,
+                        (embeded) => makeProperty(embeded, name)).concat(propDef).join(",\n");
+        concreatType = "VIRTUAL";
+        getter = "        return {\n" +_.map(prop.option.embeded,
+                       (embeded) =>
+                       sprintf("          '%s': this.get('%s_%s')",
+                               embeded.name,
+                               name,
+                               embeded.name)).join(',\n') + "\n        };";
+        setter = _.map(prop.option.embeded,
+                       (embeded) =>
+                       sprintf("        this.setDataValue('%s_%s', val.%s);",
+                               name,
+                               embeded.name,
+                               embeded.name)).join('\n');
+    }
+    else if (prop.option.arrayJoinedWith !== null) {
+        concreatType = "STRING";
+        getter = sprintf("        return (<string>this.getDataValue('%s') || '').split('%s');",
+                         name, prop.option.arrayJoinedWith);
+        setter = sprintf("        this.setDataValue('%s', val.join('%s'));", name, prop.option.arrayJoinedWith);
     }
     else {
-        let def = sprintf(`%sVIRTUAL,
+        concreatType = SequelizeMap[prop.option.concretType];
+    }
+    propDef += concreatType;
+    if (prop.option.primaryKey) {
+        propDef += ",\n      primaryKey: true";
+    }
+    if (getter !== null) {
+        propDef += sprintf(`,
       get: function(): %s {
-        return {
 %s
-        };
-      },
+      }`, tsTypeToString(prop.tsType), getter);
+    }
+    if (setter !== null) {
+        propDef += sprintf(`,
       set: function(val: %s) {
 %s
-      }
-    }`,
-                          propDef, tsTypeToString(prop.tsType),
-                          _.map(prop.option.embeded,
-                                (embeded) =>
-                                sprintf("          '%s': this.get('%s_%s')", embeded.name, prop.name, embeded.name)).join(',\n'),
-                          tsTypeToString(prop.tsType),
-                          _.map(prop.option.embeded,
-                                (embeded) =>
-                                sprintf("        this.setDataValue('%s_%s', val.%s);", prop.name, embeded.name, embeded.name)).join('\n'));
-        return (_.map(prop.option.embeded,
-                      (embeded) => makeProperty(embeded, name))
-                .concat(def)).join(',\n');
+      }`, tsTypeToString(prop.tsType), setter);
     }
+    return propDef + "\n    }";
 }
 
 function writeInterface(stream: WriteStream, interf: Interface, name: string) {

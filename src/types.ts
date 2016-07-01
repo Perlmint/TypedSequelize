@@ -7,6 +7,7 @@ export interface PropertyOption {
     concretType?: DBTypes;
     embeded: Property[];
     primaryKey: boolean;
+    arrayJoinedWith?: string;
 }
 
 export interface Property {

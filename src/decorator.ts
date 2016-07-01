@@ -109,3 +109,7 @@ export function embededField() {
 export function primaryKey() {
     return Reflect.metadata("PrimaryKey", null);
 }
+
+export function arrayJoinedWith(seperator: string) {
+    return Reflect.metadata("arrayJoinedWith", seperator);
+}

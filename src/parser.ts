@@ -59,7 +59,8 @@ export function parse(fileName: string): ParsedInfo {
             concretType: null,
             embeded: null,
             internal: false,
-            primaryKey: false
+            primaryKey: false,
+            arrayJoinedWith: null
         };
 
         if (decorators === undefined) {
@@ -91,6 +92,9 @@ export function parse(fileName: string): ParsedInfo {
             case 'primaryKey':
                 ret.primaryKey = true;
                 break;
+            case 'arrayJoinedWith':
+                ret.arrayJoinedWith = (<ts.StringLiteral>args[0]).text;
+                break;
             }
         }
         return ret;
@@ -100,7 +104,9 @@ export function parse(fileName: string): ParsedInfo {
         let ret: PropertyOption = {
             concretType: null,
             embeded: null,
-            internal: false
+            internal: false,
+            primaryKey: false,
+            arrayJoinedWith: null
         };
         var decorators: ts.NodeArray<ts.Decorator> = decl.decorators;
         let propType = typeChecker.getTypeAtLocation(decl.type);

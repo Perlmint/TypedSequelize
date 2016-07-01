@@ -17,6 +17,9 @@ export function tsTypeToString(t: ts.Type): string {
             return "Date";
         case "Buffer":
             return "Buffer";
+        case "Array":
+            let arrayt = <ts.TypeReference>t;
+            return tsTypeToString(arrayt.typeArguments[0]) + "[]";
         default:
             return t.getSymbol().name;
         }
