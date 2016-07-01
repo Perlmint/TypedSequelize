@@ -101,3 +101,7 @@ export var SequelizeMap: {[key:number]:string} = (() => {
 export function concretType(t: DBTypes) {
     return Reflect.metadata("ConcretType", t);
 }
+
+export function embededField() {
+    return Reflect.metadata("EmbededField", null);
+}
