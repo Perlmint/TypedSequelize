@@ -40,3 +40,7 @@ out
 
 # build result
 bin
+
+# temporary files
+.#*
+*~
