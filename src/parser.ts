@@ -141,8 +141,7 @@ export function parse(fileName: string): ParsedInfo {
     }
 
     function isNodeExported(node: ts.Node): boolean {
-        return (node.flags & ts.NodeFlags.Export) !== 0 ||
-            (node.parent && node.parent.kind === ts.SyntaxKind.SourceFile);
+        return (node.flags & ts.NodeFlags.Export) !== 0;
     }
 
     return {
