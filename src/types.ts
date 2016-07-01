@@ -16,10 +16,12 @@ export interface Property {
     internalFields?: string[];
 }
 
-export type InterfaceMap = ts.Map<{
+export interface Interface {
     name: string;
     properties: Property[];
-}>;
+};
+
+export type InterfaceMap = ts.Map<Interface>;
 
 export type ParsedInfo = {
     interfaces: InterfaceMap;
