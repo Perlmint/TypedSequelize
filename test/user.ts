@@ -1,6 +1,7 @@
-import {internal, concretType, DBTypes} from "../src/decorator";
+import {internal, concretType, DBTypes, primaryKey} from "../src/decorator";
 
 class User {
+    @primaryKey()
     username: string
 
     @internal()
