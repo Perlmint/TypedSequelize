@@ -6,6 +6,7 @@ export interface PropertyOption {
     internal: boolean;
     concretType?: DBTypes;
     embeded: Property[];
+    primaryKey: boolean;
 }
 
 export interface Property {
@@ -22,5 +23,6 @@ export type InterfaceMap = ts.Map<{
 
 export type ParsedInfo = {
     interfaces: InterfaceMap;
+    indecies: ts.Map<string[]>;
     imports: ts.Map<string[]>;
 };

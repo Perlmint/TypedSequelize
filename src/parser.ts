@@ -58,7 +58,8 @@ export function parse(fileName: string): ParsedInfo {
         let ret: PropertyOption = {
             concretType: null,
             embeded: null,
-            internal: false
+            internal: false,
+            primaryKey: false
         };
 
         if (decorators === undefined) {
@@ -87,6 +88,9 @@ export function parse(fileName: string): ParsedInfo {
             case 'embededField':
                 ret.embeded = [];
                 break;
+            case 'primaryKey':
+                ret.primaryKey = true;
+                break;
             }
         }
         return ret;
@@ -103,7 +107,10 @@ export function parse(fileName: string): ParsedInfo {
         let tsType: string = tsTypeToString(propType);
         if (tsType in imports) {
             let moduleName = imports[tsType];
-            usedImports[moduleName] = [tsType].concat(usedImports[moduleName]);
+            if (!(moduleName in usedImports)) {
+                usedImports[moduleName] = []
+            }
+            usedImports[moduleName].push(tsType);
         }
         Object.assign(ret, parseDecorators(decorators));
 

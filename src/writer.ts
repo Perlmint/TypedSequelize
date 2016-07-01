@@ -51,12 +51,17 @@ export function writeModel(info: ParsedInfo, writeInfo: WriteInfo) {
         stream.write(sprintf("  %s = <%sModel>seq.define<%sInstance, %sInterface>('%s', {\n", name, name, name, name, name));
         stream.write(
             _.map(interf.properties, (prop) => {
+                let propDef = sprintf(`    '%s': {
+      type: sequelize.`, prop.name);
                 if (prop.option.embeded === null) {
-                    return sprintf("    '%s': sequelize.%s", prop.name, SequelizeMap[prop.option.concretType])
+                    propDef += SequelizeMap[prop.option.concretType];
+                    if (prop.option.primaryKey) {
+                        propDef += ",\n      primaryKey: true";
+                    }
+                    return propDef + "\n    }";
                 }
                 else {
-                    let def = sprintf(`    '%s': {
-      type: sequelize.VIRTUAL,
+                    let def = sprintf(`%sVIRTUAL,
       get: function(): %s {
         return {
 %s
@@ -66,7 +71,7 @@ export function writeModel(info: ParsedInfo, writeInfo: WriteInfo) {
 %s
       }
     }`,
-                                      prop.name, tsTypeToString(prop.tsType),
+                                      propDef, tsTypeToString(prop.tsType),
                                       _.map(prop.option.embeded,
                                             (embeded) =>
                                             sprintf("          '%s': this.get('%s_%s')", embeded.name, prop.name, embeded.name)).join(',\n'),

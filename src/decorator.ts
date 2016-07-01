@@ -105,3 +105,7 @@ export function concretType(t: DBTypes) {
 export function embededField() {
     return Reflect.metadata("EmbededField", null);
 }
+
+export function primaryKey() {
+    return Reflect.metadata("PrimaryKey", null);
+}
