@@ -354,7 +354,7 @@ if (args.watch) {
 }`, name));
         });
         stream.write("\n\nexport function init(seq: sequelize.Sequelize): void {\n");
-        _.forEach(v, (interf, name) => {
+        _.forEach(v.interfaces, (interf, name) => {
             stream.write(sprintf("  init%s(seq);\n", name));
         });
         stream.write("};");
