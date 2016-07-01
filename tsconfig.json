@@ -6,12 +6,14 @@
         "sourceMap": false,
         "outDir": "bin",
         "experimentalDecorators": true,
-        "emitDecoratorMetadata": true
+        "emitDecoratorMetadata": true,
+        "rootDir": "src"
     },
     "exclude": [
         "node_modules",
         "typings",
-        "test",
-        "out"
+        "example",
+        "out",
+        "index.ts"
     ]
 }
