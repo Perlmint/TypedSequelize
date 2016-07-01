@@ -33,3 +33,4 @@ Now you can use **Person** in **src/gen/person_models**.
 
 ## TODO
 - relation
+- inheritance
