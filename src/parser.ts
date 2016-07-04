@@ -3,7 +3,7 @@ import * as ts from "typescript";
 import {DBTypes, SequelizeMap, DefaultDBType} from "./decorator";
 import * as _ from "lodash";
 import {sprintf} from "sprintf-js";
-import {InterfaceMap, ParsedInfo, Property, PropertyOption} from "./types";
+import {InterfaceMap, ParsedInfo, Property, PropertyOption, Interface} from "./types";
 import {tsTypeToString} from "./util";
 
 export function parse(fileName: string): ParsedInfo {
@@ -34,24 +34,31 @@ export function parse(fileName: string): ParsedInfo {
             return;
         }
 
-        var props: Property[] = [];
         let t = typeChecker.getTypeAtLocation(node);
         let name = t.getSymbol().getName();
+        let newInterface: Interface = {
+            name: name,
+            properties: [],
+            createdAt: 'createdAt',
+            deletedAt: null,
+            updatedAt: 'updatedAt',
+            hasPrimaryKey: false
+        };
         for (var prop of typeChecker.getPropertiesOfType(t)) {
             let propName = prop.name;
             let info = parseProperty(<ts.PropertyDeclaration>prop.getDeclarations()[0]);
 
-            props.push({
+            newInterface.properties.push({
                 name: propName,
                 tsType: info[1],
                 option: info[0]
             });
+            if (info[0].primaryKey) {
+                newInterface.hasPrimaryKey = true;
+            }
         }
 
-        interfaces[name] = {
-            name: name,
-            properties: props
-        };
+        interfaces[name] = newInterface;
     }
 
     function parseDecorators(decorators: ts.NodeArray<ts.Decorator>): PropertyOption {

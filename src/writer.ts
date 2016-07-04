@@ -69,6 +69,15 @@ function makeProperty(prop: Property, prefix: string = ""): string {
 
 function writeInterface(stream: WriteStream, interf: Interface, name: string) {
     stream.write(sprintf("export interface %sInterface {\n", name));
+    if (!interf.hasPrimaryKey) {
+        stream.write(`    id: number; // auto generated property\n`);
+    }
+    if (interf.createdAt) {
+        stream.write(`    ${interf.createdAt}: Date; // auto generated property\n`);
+    }
+    if (interf.updatedAt) {
+        stream.write(`    ${interf.updatedAt}: Date; // auto generated property\n`);
+    }
     _.forEach(interf.properties, (prop) => {
         stream.write(sprintf("    %s?: %s;\n", prop.name, tsTypeToString(prop.tsType)));
     });
