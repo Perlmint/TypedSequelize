@@ -113,3 +113,15 @@ export function primaryKey() {
 export function arrayJoinedWith(seperator: string) {
     return Reflect.metadata("arrayJoinedWith", seperator);
 }
+
+export function rpc(path: string) {
+    return Reflect.metadata("rpc", path);
+}
+
+export function find<T>(query: T|{}): T[] {
+    return null;
+}
+
+export function findOne<T>(query: T|{}): T {
+    return null;
+}
