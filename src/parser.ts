@@ -19,10 +19,6 @@ export function parse(fileName: string): ParsedInfo {
     ts.forEachChild(source, visit);
 
     function visit(node: ts.Node) {
-        if (!isNodeExported(node)) {
-            return;
-        }
-
         if (node.kind !== ts.SyntaxKind.ClassDeclaration) {
             if (node.kind === ts.SyntaxKind.ImportDeclaration) {
                 let importDecl = <ts.ImportDeclaration>node;
@@ -31,6 +27,10 @@ export function parse(fileName: string): ParsedInfo {
                     imports[namedBinding.name.text] = moduleName;
                 }
             }
+            return;
+        }
+
+        if (!isNodeExported(node)) {
             return;
         }
 
