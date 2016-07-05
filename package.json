@@ -10,7 +10,7 @@
     "type": "git",
     "url": "git+https://github.com/Perlmint/TypedSequelize.git"
   },
-  "author": "",
+  "author": "Gyusun Yeom",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/Perlmint/TypedSequelize/issues"
