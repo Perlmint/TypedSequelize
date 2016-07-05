@@ -14,9 +14,6 @@ function parse(fileName) {
     var usedImports = {};
     ts.forEachChild(source, visit);
     function visit(node) {
-        if (!isNodeExported(node)) {
-            return;
-        }
         if (node.kind !== ts.SyntaxKind.ClassDeclaration) {
             if (node.kind === ts.SyntaxKind.ImportDeclaration) {
                 let importDecl = node;
@@ -27,22 +24,32 @@ function parse(fileName) {
             }
             return;
         }
-        var props = [];
+        if (!isNodeExported(node)) {
+            return;
+        }
         let t = typeChecker.getTypeAtLocation(node);
         let name = t.getSymbol().getName();
+        let newInterface = {
+            name: name,
+            properties: [],
+            createdAt: 'createdAt',
+            deletedAt: null,
+            updatedAt: 'updatedAt',
+            hasPrimaryKey: false
+        };
         for (var prop of typeChecker.getPropertiesOfType(t)) {
             let propName = prop.name;
             let info = parseProperty(prop.getDeclarations()[0]);
-            props.push({
+            newInterface.properties.push({
                 name: propName,
                 tsType: info[1],
                 option: info[0]
             });
+            if (info[0].primaryKey) {
+                newInterface.hasPrimaryKey = true;
+            }
         }
-        interfaces[name] = {
-            name: name,
-            properties: props
-        };
+        interfaces[name] = newInterface;
     }
     function parseDecorators(decorators) {
         let ret = {

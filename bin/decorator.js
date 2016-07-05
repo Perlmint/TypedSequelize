@@ -100,3 +100,15 @@ function arrayJoinedWith(seperator) {
     return Reflect.metadata("arrayJoinedWith", seperator);
 }
 exports.arrayJoinedWith = arrayJoinedWith;
+function rpc(path) {
+    return Reflect.metadata("rpc", path);
+}
+exports.rpc = rpc;
+function find(query) {
+    return null;
+}
+exports.find = find;
+function findOne(query) {
+    return null;
+}
+exports.findOne = findOne;

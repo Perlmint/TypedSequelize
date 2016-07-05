@@ -83,10 +83,13 @@ else {
     });
     _.forEach(interfacesByFile, (v, k) => {
         let basefilename = path_1.basename(k, '.ts');
-        let outfilename = basefilename + '_models.ts';
+        let outName = basefilename + '_models', outTypesName = basefilename + '_types';
         writer_1.writeModel(v, {
             outDir: args.outdir,
-            outStream: fs_1.createWriteStream(path_1.join(args.outdir, outfilename)),
+            outStream: fs_1.createWriteStream(path_1.join(args.outdir, outName + '.ts')),
+            outName: outName,
+            outTypesStream: fs_1.createWriteStream(path_1.join(args.outdir, outTypesName + '.ts')),
+            outTypesName: outTypesName,
             rootDir: args.rootdir,
             srcPath: k
         });
