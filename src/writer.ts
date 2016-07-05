@@ -4,7 +4,6 @@ import {ParsedPath, relative, join, dirname} from 'path';
 import {WriteStream} from 'fs';
 import {tsTypeToString} from './util';
 import {SequelizeMap} from './decorator';
-import {sprintf} from 'sprintf-js';
 import * as _ from "lodash";
 
 export interface WriteInfo {
@@ -22,8 +21,8 @@ function makeProperty(prop: Property, prefix: string = ""): string {
         prefix += "_";
     }
     let name = prefix + prop.name;
-    let propDef = sprintf(`    '%s': {
-      type: sequelize.`, name);
+    let propDef = `    '${name}': {
+      type: sequelize.`;
     let getter: string = null, setter: string = null, concreteType: string;
     if (prop.option.embeded !== null) {
         propDef = _.map(prop.option.embeded,
@@ -31,22 +30,15 @@ function makeProperty(prop: Property, prefix: string = ""): string {
         concreteType = "VIRTUAL";
         getter = "        return {\n" +_.map(prop.option.embeded,
                        (embeded) =>
-                       sprintf("          '%s': this.get('%s_%s')",
-                               embeded.name,
-                               name,
-                               embeded.name)).join(',\n') + "\n        };";
+                       `          '${embeded.name}': this.get('${name}_${embeded.name}')`).join(',\n') + "\n        };";
         setter = _.map(prop.option.embeded,
                        (embeded) =>
-                       sprintf("        this.setDataValue('%s_%s', val.%s);",
-                               name,
-                               embeded.name,
-                               embeded.name)).join('\n');
+                       `        this.setDataValue('${name}_${embeded.name}', val.${embeded.name});`).join('\n');
     }
     else if (prop.option.arrayJoinedWith !== null) {
         concreteType = "STRING";
-        getter = sprintf("        return (<string>this.getDataValue('%s') || '').split('%s');",
-                         name, prop.option.arrayJoinedWith);
-        setter = sprintf("        this.setDataValue('%s', val.join('%s'));", name, prop.option.arrayJoinedWith);
+        getter = `        return (<string>this.getDataValue('${name}') || '').split('${prop.option.arrayJoinedWith}');`;
+        setter = `        this.setDataValue('${name}', val.join('${prop.option.arrayJoinedWith}'));`;
     }
     else {
         concreteType = SequelizeMap[prop.option.concreteType];
@@ -56,22 +48,22 @@ function makeProperty(prop: Property, prefix: string = ""): string {
         propDef += ",\n      primaryKey: true";
     }
     if (getter !== null) {
-        propDef += sprintf(`,
-      get: function(): %s {
-%s
-      }`, tsTypeToString(prop.tsType), getter);
+        propDef += `,
+      get: function(): ${tsTypeToString(prop.tsType)} {
+${getter}
+      }`;
     }
     if (setter !== null) {
-        propDef += sprintf(`,
-      set: function(val: %s) {
-%s
-      }`, tsTypeToString(prop.tsType), setter);
+        propDef += `,
+      set: function(val: ${tsTypeToString(prop.tsType)}) {
+${setter}
+      }`;
     }
     return propDef + "\n    }";
 }
 
 function writeInterface(stream: WriteStream, interf: Interface, name: string) {
-    stream.write(sprintf("export interface %sInterface {\n", name));
+    stream.write(`export interface ${name}Interface {\n`);
     if (!interf.hasPrimaryKey) {
         stream.write(`    id?: number; // auto generated property\n`);
     }
@@ -82,23 +74,23 @@ function writeInterface(stream: WriteStream, interf: Interface, name: string) {
         stream.write(`    ${interf.updatedAt}?: Date; // auto generated property\n`);
     }
     _.forEach(interf.properties, (prop) => {
-        stream.write(sprintf("    %s?: %s;\n", prop.name, tsTypeToString(prop.tsType)));
+        stream.write(`    ${prop.name}?: ${tsTypeToString(prop.tsType)};\n`);
     });
     stream.write("}\n\n");
 }
 
 function writeModelDef(stream: WriteStream, interf: Interface, name: string) {
-    stream.write(sprintf("interface %sInstance extends sequelize.Instance<%sInterface>, %sInterface {}\n\n", name, name, name));
-    stream.write(sprintf("interface %sModel extends sequelize.Model<%sInstance, %sInterface> {}\n\n", name, name, name));
-    stream.write(sprintf("var %sInitialized: boolean = false;\n", name));
-    stream.write(sprintf("export var %s: %sModel;\n", name, name));
-    stream.write(sprintf(`export function init%s(seq: sequelize.Sequelize): void {
-  if (%sInitialized) {
+    stream.write(`interface ${name}Instance extends sequelize.Instance<${name}Interface>, ${name}Interface {}\n\n`);
+    stream.write(`interface ${name}Model extends sequelize.Model<${name}Instance, ${name}Interface> {}\n\n`);
+    stream.write(`var ${name}Initialized: boolean = false;\n`);
+    stream.write(`export var ${name}: ${name}Model;\n`);
+    stream.write(`export function init${name}(seq: sequelize.Sequelize): void {
+  if (${name}Initialized) {
     return;
   }
 
-`, name, name))
-    stream.write(sprintf("  %s = <%sModel>seq.define<%sInstance, %sInterface>('%s', {\n", name, name, name, name, name));
+`);
+    stream.write(`  ${name} = <${name}Model>seq.define<${name}Instance, ${name}Interface>('${name}', {\n`);
     stream.write(
         _.map(interf.properties, (prop) => makeProperty(prop)).join(',\n'));
     stream.write("\n");
@@ -107,19 +99,19 @@ function writeModelDef(stream: WriteStream, interf: Interface, name: string) {
         return !prop.option.embeded;
     });
     stream.write("  });\n\n");
-    stream.write(sprintf(`  %sInitialized = true;
-}`, name));
+    stream.write(`  ${name}Initialized = true;
+}`);
 }
 
 export function writeModel(info: ParsedInfo, writeInfo: WriteInfo) {
     let stream = writeInfo.outStream;
 
     // write typings reference
-    stream.write(sprintf("/// <reference path=\"%s\" />\n\n",
-                         relative(writeInfo.outDir,
-                                  join(writeInfo.rootDir,
-                                       "typings/index.d.ts"))
-                         .replace(new RegExp("\\\\", "g"), "/")));
+    let typings_path = relative(writeInfo.outDir,
+                                join(writeInfo.rootDir,
+                                     "typings/index.d.ts"))
+        .replace(new RegExp("\\\\", "g"), "/");
+    stream.write(`/// <reference path="${typings_path}" />\n\n`);
 
     // write dependency - sequelize
     stream.write("import * as sequelize from 'sequelize';\n\n");
@@ -132,8 +124,8 @@ export function writeModel(info: ParsedInfo, writeInfo: WriteInfo) {
                                       join(dirname(writeInfo.srcPath), moduleName))
                     .replace(new RegExp("\\\\", "g"), "/");
             }
-            stream.write(sprintf("import { %s } from '%s';\n",
-                                 items.join(", "), moduleName));
+            let joined_items = items.join(", ");
+            stream.write(`import { ${joined_items} } from '${moduleName}';\n`);
         });
         stream.write("\n");
     }
@@ -149,7 +141,7 @@ export function writeModel(info: ParsedInfo, writeInfo: WriteInfo) {
     // write init function
     stream.write("\n\nexport function init(seq: sequelize.Sequelize): void {\n");
     _.forEach(info.interfaces, (interf, name) => {
-        stream.write(sprintf("  init%s(seq);\n", name));
+        stream.write(`  init${name}(seq);\n`);
     });
     stream.write("};");
 }
