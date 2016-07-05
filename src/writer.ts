@@ -12,6 +12,9 @@ export interface WriteInfo {
     outDir: string;
     rootDir: string;
     outStream: WriteStream;
+    outName: string;
+    outTypesStream: WriteStream;
+    outTypesName: string;
 };
 
 function makeProperty(prop: Property, prefix: string = ""): string {
@@ -69,10 +72,22 @@ function makeProperty(prop: Property, prefix: string = ""): string {
 
 function writeInterface(stream: WriteStream, interf: Interface, name: string) {
     stream.write(sprintf("export interface %sInterface {\n", name));
+    if (!interf.hasPrimaryKey) {
+        stream.write(`    id?: number; // auto generated property\n`);
+    }
+    if (interf.createdAt) {
+        stream.write(`    ${interf.createdAt}?: Date; // auto generated property\n`);
+    }
+    if (interf.updatedAt) {
+        stream.write(`    ${interf.updatedAt}?: Date; // auto generated property\n`);
+    }
     _.forEach(interf.properties, (prop) => {
         stream.write(sprintf("    %s?: %s;\n", prop.name, tsTypeToString(prop.tsType)));
     });
     stream.write("}\n\n");
+}
+
+function writeModelDef(stream: WriteStream, interf: Interface, name: string) {
     stream.write(sprintf("interface %sInstance extends sequelize.Instance<%sInterface>, %sInterface {}\n\n", name, name, name));
     stream.write(sprintf("interface %sModel extends sequelize.Model<%sInstance, %sInterface> {}\n\n", name, name, name));
     stream.write(sprintf("var %sInitialized: boolean = false;\n", name));
@@ -110,18 +125,26 @@ export function writeModel(info: ParsedInfo, writeInfo: WriteInfo) {
     stream.write("import * as sequelize from 'sequelize';\n\n");
 
     // write dependencies - user defined types
-    _.forEach(info.imports, (items: string[], moduleName: string) => {
-        if (moduleName[0] === ".") {
-            moduleName = relative(writeInfo.outDir,
-                                  join(dirname(writeInfo.srcPath), moduleName))
-                .replace(new RegExp("\\\\", "g"), "/");
-        }
-        stream.write(sprintf("import { %s } from '%s';\n",
-                             items.join(", "), moduleName));
-    });
-    stream.write("\n");
+    function writeDependency(stream: WriteStream) {
+        _.forEach(info.imports, (items: string[], moduleName: string) => {
+            if (moduleName[0] === ".") {
+                moduleName = relative(writeInfo.outDir,
+                                      join(dirname(writeInfo.srcPath), moduleName))
+                    .replace(new RegExp("\\\\", "g"), "/");
+            }
+            stream.write(sprintf("import { %s } from '%s';\n",
+                                 items.join(", "), moduleName));
+        });
+        stream.write("\n");
+    }
+    writeDependency(stream);
+    writeDependency(writeInfo.outTypesStream);
 
-    _.forEach(info.interfaces, writeInterface.bind(null, stream));
+    _.forEach(info.interfaces, writeInterface.bind(null, writeInfo.outTypesStream));
+    stream.write('import {');
+    stream.write(_.map(info.interfaces, (i) => `${i.name}Interface`).join(', '));
+    stream.write(`} from './${writeInfo.outTypesName}';\n\n`);
+    _.forEach(info.interfaces, writeModelDef.bind(null, stream));
 
     // write init function
     stream.write("\n\nexport function init(seq: sequelize.Sequelize): void {\n");

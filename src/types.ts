@@ -20,6 +20,10 @@ export interface Property {
 export interface Interface {
     name: string;
     properties: Property[];
+    hasPrimaryKey: boolean;
+    createdAt: boolean | string;
+    updatedAt: boolean | string;
+    deletedAt: boolean | string;
 };
 
 export type InterfaceMap = ts.Map<Interface>;
