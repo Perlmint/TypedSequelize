@@ -3,11 +3,7 @@
 import * as sequelize from 'sequelize';
 
 
-export interface UserInterface {
-    username?: string;
-    password?: string;
-    signupDate?: Date;
-}
+import {UserInterface} from './user_types';
 
 interface UserInstance extends sequelize.Instance<UserInterface>, UserInterface {}
 

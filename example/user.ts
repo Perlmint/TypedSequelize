@@ -1,11 +1,11 @@
-import {internal, concretType, DBTypes, primaryKey} from "../src/decorator";
+import {internal, concreteType, DBTypes, primaryKey} from "../src/decorator";
 
-class User {
+export class User {
     @primaryKey()
     username: string
 
     @internal()
-    @concretType(DBTypes.Mediumtext)
+    @concreteType(DBTypes.Mediumtext)
     password: string
 
     signupDate: Date
