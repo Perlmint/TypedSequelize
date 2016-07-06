@@ -2,7 +2,6 @@
 import * as ts from "typescript";
 import {DBTypes, SequelizeMap, DefaultDBType} from "./decorator";
 import * as _ from "lodash";
-import {sprintf} from "sprintf-js";
 import {InterfaceMap, ParsedInfo, Property, PropertyOption, Interface} from "./types";
 import {tsTypeToString} from "./util";
 
