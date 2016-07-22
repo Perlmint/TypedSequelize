@@ -97,7 +97,7 @@ function writeModel(info, writeInfo) {
                 moduleName = path_1.relative(writeInfo.outDir, path_1.join(path_1.dirname(writeInfo.srcPath), moduleName))
                     .replace(new RegExp("\\\\", "g"), "/");
             }
-            let joined_items = items.join(", ");
+            let joined_items = _.uniq(items).join(", ");
             stream.write(`import { ${joined_items} } from '${moduleName}';\n`);
         });
         stream.write("\n");
