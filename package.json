@@ -1,6 +1,6 @@
 {
   "name": "typedsequelize",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "typescript source generator for sequelize &amp; rpc",
   "main": "index.js",
   "scripts": {
