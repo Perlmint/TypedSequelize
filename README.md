@@ -1,5 +1,6 @@
 # TypedSequelize
-typescript source generator for sequelize &amp; rpc
+typescript source generator for sequelize &amp; rpc  
+*Code First* model
 
 ## How to use
 ### Model Definition
@@ -32,5 +33,4 @@ Now you can use **Person** in **src/gen/person_models**.
     - Array is saved with specified seperator
 
 ## TODO
-- relation
-- inheritance
+See [Issues page](https://github.com/Perlmint/TypedSequelize/issues)
