@@ -125,3 +125,7 @@ export function find<T>(query: T|{}): T[] {
 export function findOne<T>(query: T|{}): T {
     return null;
 }
+
+export function model() {
+    return Reflect.metadata("Model", null);
+}

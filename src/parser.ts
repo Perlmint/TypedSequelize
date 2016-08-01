@@ -5,6 +5,18 @@ import * as _ from "lodash";
 import {InterfaceMap, ParsedInfo, Property, PropertyOption, Interface} from "./types";
 import {tsTypeToString} from "./util";
 
+function getDecoratorName(decorator: ts.Decorator): string {
+    switch (decorator.expression.kind) {
+        case ts.SyntaxKind.Identifier:
+            let id = (<ts.Identifier>decorator.expression);
+            return id.text;
+        case ts.SyntaxKind.CallExpression:
+            let call = (<ts.CallExpression>decorator.expression);
+            return (<ts.Identifier>call.expression).text;
+    }
+    return null;
+}
+
 export function parse(fileName: string): ParsedInfo {
     let program = ts.createProgram([fileName], {
         target: ts.ScriptTarget.ES6
@@ -29,7 +41,10 @@ export function parse(fileName: string): ParsedInfo {
             return;
         }
 
-        if (!isNodeExported(node)) {
+        // only model exports
+        if (node.decorators == null ||
+            node.decorators.findIndex(
+                (d: ts.Decorator) => getDecoratorName(d) == "model") == -1) {
             return;
         }
 
@@ -73,17 +88,10 @@ export function parse(fileName: string): ParsedInfo {
             return ret;
         }
         for (var decorator of decorators) {
-            let name: string, args: ts.Expression[] = [];
-            switch (decorator.expression.kind) {
-            case ts.SyntaxKind.Identifier:
-                let id = (<ts.Identifier>decorator.expression);
-                name = id.text;
-                break;
-            case ts.SyntaxKind.CallExpression:
+            let name: string = getDecoratorName(decorator), args: ts.Expression[] = [];
+            if (decorator.expression.kind == ts.SyntaxKind.CallExpression) {
                 let call = (<ts.CallExpression>decorator.expression);
-                name = (<ts.Identifier>call.expression).text;
                 args = call.arguments.map<ts.Expression>((v, i) => {return v;});
-                break;
             }
             switch (name) {
             case 'internal':
