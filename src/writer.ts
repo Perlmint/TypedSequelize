@@ -131,10 +131,17 @@ export function writeModel(info: ParsedInfo, writeInfo: WriteInfo) {
     }
     writeDependency(stream);
     writeDependency(writeInfo.outTypesStream);
+    _.forEach(_.sortBy(_.keys(info.declarations)), (k) => {
+        writeInfo.outTypesStream.write(info.declarations[k].replace(/\r\n|\r/g, "\n"));
+        writeInfo.outTypesStream.write("\n\n");
+    });
 
     _.forEach(info.interfaces, writeInterface.bind(null, writeInfo.outTypesStream));
     stream.write('import {');
-    stream.write(_.map(info.interfaces, (i) => `${i.name}Interface`).join(', '));
+    stream.write(
+        _.map(info.interfaces, (i) => `${i.name}Interface`)
+            .concat(_.keys(info.declarations))
+            .join(', '));
     stream.write(`} from './${writeInfo.outTypesName}';\n\n`);
     _.forEach(info.interfaces, writeModelDef.bind(null, stream));
 

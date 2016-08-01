@@ -27,6 +27,11 @@ export function parse(fileName: string): ParsedInfo {
 
     var imports: ts.Map<string> = {};
     var usedImports: ts.Map<string[]> = {};
+    var usedDeclaration: {
+        name: string
+        begin: number
+        end: number
+    }[] = [];
     ts.forEachChild(source, visit);
 
     function visit(node: ts.Node) {
@@ -125,12 +130,22 @@ export function parse(fileName: string): ParsedInfo {
         var decorators: ts.NodeArray<ts.Decorator> = decl.decorators;
         let propType = typeChecker.getTypeAtLocation(decl.type);
         let tsType: string = tsTypeToString(propType);
+        // import
         if (tsType in imports) {
             let moduleName = imports[tsType];
             if (!(moduleName in usedImports)) {
                 usedImports[moduleName] = []
             }
             usedImports[moduleName].push(tsType);
+        }
+        // declared in same file or default
+        else if (!isNodeType(tsType)) {
+            let decl = propType.symbol.declarations[0];
+            usedDeclaration.push({
+                name: tsType,
+                begin: decl.pos,
+                end: decl.end
+            });
         }
         Object.assign(ret, parseDecorators(decorators));
 
@@ -158,8 +173,22 @@ export function parse(fileName: string): ParsedInfo {
         return (node.flags & ts.NodeFlags.Export) !== 0;
     }
 
+    function isNodeType(typename: string): boolean {
+        return _.includes(['string', 'number', 'boolean', 'Date'], typename);
+    }
+
+    let declarations: {[key:string]:string} = {};
+    _.forEach(usedDeclaration, (declInfo) => {
+        var code = source.text.slice(declInfo.begin, declInfo.end).trim();
+        if (!code.startsWith('export')) {
+            code = 'export ' + code;
+        }
+        declarations[declInfo.name] = code;
+    });
+
     return {
         interfaces: interfaces,
+        declarations: declarations,
         imports: usedImports
     };
 }

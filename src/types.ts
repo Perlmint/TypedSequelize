@@ -30,5 +30,6 @@ export type InterfaceMap = ts.Map<Interface>;
 
 export type ParsedInfo = {
     interfaces: InterfaceMap;
+    declarations: {[key:string]:string};
     imports: ts.Map<string[]>;
 };
