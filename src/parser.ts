@@ -141,8 +141,10 @@ export function parse(fileName: string): ParsedInfo {
         let baseType: string = tsType.replace('[]', '');
         let typeDecl: ts.Declaration = null;
         let relationship: Relationship = null;
+        let isArray: boolean = false;
         if (propType.symbol && (propType.flags & ts.TypeFlags.Enum) == 0) {
             if (propType.symbol.name == "Array") {
+                isArray = true;
                 if ((propType as ts.GenericType).typeArguments[0].symbol) {
                     typeDecl = (propType as ts.GenericType).typeArguments[0].symbol.declarations[0];
                 }
@@ -152,19 +154,19 @@ export function parse(fileName: string): ParsedInfo {
             }
         }
         // import
-        if (baseType in imports) {
+        if (typeDecl) {
             let moduleName = imports[baseType];
             let typeDecoratorNames = _.map(typeDecl.decorators, getDecoratorName);
             if (_.includes(typeDecoratorNames, 'model')) {
                 // model - relation
                 relationship = {
-                    type: RelationshipType.OneToMany,
+                    type: isArray?RelationshipType.OneToMany:RelationshipType.ManyToOne,
                     name : null,
                     targetName: baseType,
                     targetModule: moduleName
                 };
             }
-            else {
+            else if (baseType in imports) {
                 if (!(moduleName in usedImports)) {
                     usedImports[moduleName] = []
                 }

@@ -19,7 +19,8 @@ export interface Property {
 
 export enum RelationshipType {
     OneToMany,
-    ManyToMany
+    ManyToMany,
+    ManyToOne
 }
 
 export interface Relationship {
