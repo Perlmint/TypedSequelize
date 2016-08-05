@@ -2,7 +2,20 @@
 /// <reference path="../typings/index.d.ts" />
 const ts = require("typescript");
 const decorator_1 = require("./decorator");
+const _ = require("lodash");
+const types_1 = require("./types");
 const util_1 = require("./util");
+function getDecoratorName(decorator) {
+    switch (decorator.expression.kind) {
+        case ts.SyntaxKind.Identifier:
+            let id = decorator.expression;
+            return id.text;
+        case ts.SyntaxKind.CallExpression:
+            let call = decorator.expression;
+            return call.expression.text;
+    }
+    return null;
+}
 function parse(fileName) {
     let program = ts.createProgram([fileName], {
         target: ts.ScriptTarget.ES6
@@ -12,6 +25,7 @@ function parse(fileName) {
     var interfaces = {};
     var imports = {};
     var usedImports = {};
+    var usedDeclaration = [];
     ts.forEachChild(source, visit);
     function visit(node) {
         if (node.kind !== ts.SyntaxKind.ClassDeclaration) {
@@ -24,7 +38,9 @@ function parse(fileName) {
             }
             return;
         }
-        if (!isNodeExported(node)) {
+        // only model exports
+        if (node.decorators == null ||
+            node.decorators.findIndex((d) => getDecoratorName(d) == "model") == -1) {
             return;
         }
         let t = typeChecker.getTypeAtLocation(node);
@@ -35,18 +51,25 @@ function parse(fileName) {
             createdAt: 'createdAt',
             deletedAt: null,
             updatedAt: 'updatedAt',
-            hasPrimaryKey: false
+            hasPrimaryKey: false,
+            relationships: []
         };
         for (var prop of typeChecker.getPropertiesOfType(t)) {
             let propName = prop.name;
-            let info = parseProperty(prop.getDeclarations()[0]);
-            newInterface.properties.push({
-                name: propName,
-                tsType: info[1],
-                option: info[0]
-            });
-            if (info[0].primaryKey) {
-                newInterface.hasPrimaryKey = true;
+            var info = parseProperty(prop.getDeclarations()[0]);
+            if (info[2] == null) {
+                newInterface.properties.push({
+                    name: propName,
+                    tsType: info[1],
+                    option: info[0]
+                });
+                if (info[0].primaryKey) {
+                    newInterface.hasPrimaryKey = true;
+                }
+            }
+            else {
+                info[2].name = propName;
+                newInterface.relationships.push(info[2]);
             }
         }
         interfaces[name] = newInterface;
@@ -63,17 +86,10 @@ function parse(fileName) {
             return ret;
         }
         for (var decorator of decorators) {
-            let name, args = [];
-            switch (decorator.expression.kind) {
-                case ts.SyntaxKind.Identifier:
-                    let id = decorator.expression;
-                    name = id.text;
-                    break;
-                case ts.SyntaxKind.CallExpression:
-                    let call = decorator.expression;
-                    name = call.expression.text;
-                    args = call.arguments.map((v, i) => { return v; });
-                    break;
+            let name = getDecoratorName(decorator), args = [];
+            if (decorator.expression.kind == ts.SyntaxKind.CallExpression) {
+                let call = decorator.expression;
+                args = call.arguments.map((v, i) => { return v; });
             }
             switch (name) {
                 case 'internal':
@@ -106,12 +122,51 @@ function parse(fileName) {
         var decorators = decl.decorators;
         let propType = typeChecker.getTypeAtLocation(decl.type);
         let tsType = util_1.tsTypeToString(propType);
-        if (tsType in imports) {
-            let moduleName = imports[tsType];
-            if (!(moduleName in usedImports)) {
-                usedImports[moduleName] = [];
+        let baseType = tsType.replace('[]', '');
+        let typeDecl = null;
+        let relationship = null;
+        let isArray = false;
+        if (propType.symbol && (propType.flags & ts.TypeFlags.Enum) == 0) {
+            if (propType.symbol.name == "Array") {
+                isArray = true;
+                if (propType.typeArguments[0].symbol) {
+                    typeDecl = propType.typeArguments[0].symbol.declarations[0];
+                }
             }
-            usedImports[moduleName].push(tsType);
+            else {
+                typeDecl = propType.symbol.declarations[0];
+            }
+        }
+        // import
+        if (typeDecl) {
+            let moduleName = imports[baseType];
+            let typeDecoratorNames = _.map(typeDecl.decorators, getDecoratorName);
+            if (_.includes(typeDecoratorNames, 'model')) {
+                // model - relation
+                relationship = {
+                    type: isArray ? types_1.RelationshipType.OneToMany : types_1.RelationshipType.ManyToOne,
+                    name: null,
+                    targetName: baseType,
+                    targetModule: moduleName
+                };
+            }
+            else if (baseType in imports) {
+                if (!(moduleName in usedImports)) {
+                    usedImports[moduleName] = [];
+                }
+                usedImports[moduleName].push(baseType);
+            }
+        }
+        else if (!isNodeType(tsType)) {
+            if (decl.getSourceFile() == source) {
+                usedDeclaration.push({
+                    name: tsType,
+                    begin: typeDecl.pos,
+                    end: typeDecl.end
+                });
+            }
+            else {
+            }
         }
         Object.assign(ret, parseDecorators(decorators));
         // fill concreteType
@@ -131,13 +186,28 @@ function parse(fileName) {
                 }
             }
         }
-        return [ret, propType];
+        return [ret, propType, relationship];
     }
     function isNodeExported(node) {
         return (node.flags & ts.NodeFlags.Export) !== 0;
     }
+    function isNodeType(typename) {
+        return _.includes(['string', 'number', 'boolean', 'Date'], typename.replace("[]", ""));
+    }
+    let declarations = {};
+    _.forEach(usedDeclaration, (declInfo) => {
+        if (interfaces[declInfo.name]) {
+            return;
+        }
+        var code = source.text.slice(declInfo.begin, declInfo.end).trim();
+        if (!code.startsWith('export')) {
+            code = 'export ' + code;
+        }
+        declarations[declInfo.name] = code;
+    });
     return {
         interfaces: interfaces,
+        declarations: declarations,
         imports: usedImports
     };
 }
