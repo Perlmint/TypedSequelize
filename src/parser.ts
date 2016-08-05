@@ -140,12 +140,20 @@ export function parse(fileName: string): ParsedInfo {
         }
         // declared in same file or default
         else if (!isNodeType(tsType)) {
-            let decl = propType.symbol.declarations[0];
-            usedDeclaration.push({
-                name: tsType,
-                begin: decl.pos,
-                end: decl.end
-            });
+            let decl: ts.Declaration = null;
+            if (propType.symbol.name == "Array") {
+                decl = (propType as ts.GenericType).typeArguments[0].symbol.declarations[0];
+            }
+            else {
+                decl = propType.symbol.declarations[0];
+            }
+            if (decl.getSourceFile() == source) {
+                usedDeclaration.push({
+                    name: tsType,
+                    begin: decl.pos,
+                    end: decl.end
+                });
+            }
         }
         Object.assign(ret, parseDecorators(decorators));
 
@@ -174,11 +182,15 @@ export function parse(fileName: string): ParsedInfo {
     }
 
     function isNodeType(typename: string): boolean {
-        return _.includes(['string', 'number', 'boolean', 'Date'], typename);
+        return _.includes(['string', 'number', 'boolean', 'Date'],
+                          typename.replace("[]",""));
     }
 
     let declarations: {[key:string]:string} = {};
     _.forEach(usedDeclaration, (declInfo) => {
+        if (interfaces[declInfo.name]) {
+            return;
+        }
         var code = source.text.slice(declInfo.begin, declInfo.end).trim();
         if (!code.startsWith('export')) {
             code = 'export ' + code;
