@@ -1,5 +1,5 @@
 /// <reference path="../typings/index.d.ts" />
-import {ParsedInfo, Interface, Property} from './types';
+import {ParsedInfo, Interface, Property, RelationshipType} from './types';
 import {ParsedPath, relative, join, dirname} from 'path';
 import {WriteStream} from 'fs';
 import {tsTypeToString} from './util';
@@ -98,9 +98,28 @@ function writeModelDef(stream: WriteStream, interf: Interface, name: string) {
     let embeded = _.filter(interf.properties, (prop) => {
         return !prop.option.embeded;
     });
-    stream.write("  });\n\n");
-    stream.write(`  ${name}Initialized = true;
-}`);
+    stream.write("  });\n");
+    _.forEach(interf.relationships, (rel) => {
+        var module_name = rel.targetModule + '_models';
+        stream.write(`
+  // for setup relation. can't use import in funcion scope
+  var ${rel.targetName} = require('${rel.targetModule}').${rel.targetName};`);
+        switch (rel.type) {
+        case RelationshipType.OneToMany:
+            stream.write(`
+  ${name}.hasMany(${rel.targetName}, {as: '${rel.name}'});`);
+            break;
+        case RelationshipType.ManyToOne:
+            stream.write(`
+  ${name}.belongsTo(${rel.targetName}, {as: '${rel.name}'});`);
+        }
+    });
+    stream.write(`
+
+  ${name}Initialized = true;
+}
+
+`);
 }
 
 export function writeModel(info: ParsedInfo, writeInfo: WriteInfo) {
@@ -131,10 +150,17 @@ export function writeModel(info: ParsedInfo, writeInfo: WriteInfo) {
     }
     writeDependency(stream);
     writeDependency(writeInfo.outTypesStream);
+    _.forEach(_.sortBy(_.keys(info.declarations)), (k) => {
+        writeInfo.outTypesStream.write(info.declarations[k].replace(/\r\n|\r/g, "\n"));
+        writeInfo.outTypesStream.write("\n\n");
+    });
 
     _.forEach(info.interfaces, writeInterface.bind(null, writeInfo.outTypesStream));
     stream.write('import {');
-    stream.write(_.map(info.interfaces, (i) => `${i.name}Interface`).join(', '));
+    stream.write(
+        _.map(info.interfaces, (i) => `${i.name}Interface`)
+            .concat(_.keys(info.declarations))
+            .join(', '));
     stream.write(`} from './${writeInfo.outTypesName}';\n\n`);
     _.forEach(info.interfaces, writeModelDef.bind(null, stream));
 

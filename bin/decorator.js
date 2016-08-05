@@ -112,3 +112,7 @@ function findOne(query) {
     return null;
 }
 exports.findOne = findOne;
+function model() {
+    return Reflect.metadata("Model", null);
+}
+exports.model = model;

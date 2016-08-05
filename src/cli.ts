@@ -10,14 +10,39 @@ import {parse} from './parser';
 import {writeModel, WriteInfo} from './writer';
 import {InterfaceMap, ParsedInfo} from './types';
 
+interface options {
+    outdir: string
+    rootdir: string
+    inputs: string[],
+    watch: boolean
+}
+
+function watch(rootFileNames: string[], options: ts.CompilerOptions) {
+}
+
+var args: options = {
+    outdir: "",
+    rootdir: "",
+    watch: false,
+    inputs: []
+};
+
+try {
+    accessSync('typedseq.json');
+    args = Object.assign(args, JSON.parse(readFileSync('typedseq.json', 'utf8')));
+}
+catch (e) {
+}
+
 var parser = new ArgumentParser({
     version: "DEV_VERSION",
     addHelp: true,
     description: "Sequelize Definition generator"
 });
 parser.addArgument(
-    ["outdir"],
+    ["--outdir"],
     {
+        defaultValue: args.outdir,
         type: "string",
         help: "output directory"
     }
@@ -25,13 +50,15 @@ parser.addArgument(
 parser.addArgument(
     ["--rootdir"],
     {
+        defaultValue: args.rootdir,
         type: "string",
         help: "output root directory for typescript reference"
     }
 );
 parser.addArgument(
-    ["inputs"],
+    ["--inputs"],
     {
+        defaultValue: args.inputs,
         nargs: "+",
         type: "string",
         help: "Model interface definition files"
@@ -59,16 +86,20 @@ parser.addArgument(
 parser.addArgument(
     ["-w", "--watch"],
     {
+        defaultValue: args.watch,
         dest: "watch",
         action: "storeTrue",
         help: "Watch source definitions"
     }
 );
 
-function watch(rootFileNames: string[], options: ts.CompilerOptions) {
+var parsedArgs: options = parser.parseArgs();
+if (parsedArgs.inputs) {
+    args.inputs = parsedArgs.inputs;
 }
-
-var args = parser.parseArgs()
+if (parsedArgs.outdir) {
+    args.outdir = parsedArgs.outdir;
+}
 
 // create out dir
 try {
