@@ -2,7 +2,8 @@
 import * as ts from "typescript";
 import {DBTypes, SequelizeMap, DefaultDBType} from "./decorator";
 import * as _ from "lodash";
-import {InterfaceMap, ParsedInfo, Property, PropertyOption, Interface} from "./types";
+import {InterfaceMap, ParsedInfo, Property, PropertyOption, Interface,
+        RelationshipType, Relationship} from "./types";
 import {tsTypeToString} from "./util";
 
 function getDecoratorName(decorator: ts.Decorator): string {
@@ -61,19 +62,26 @@ export function parse(fileName: string): ParsedInfo {
             createdAt: 'createdAt',
             deletedAt: null,
             updatedAt: 'updatedAt',
-            hasPrimaryKey: false
+            hasPrimaryKey: false,
+            relationships: []
         };
         for (var prop of typeChecker.getPropertiesOfType(t)) {
             let propName = prop.name;
-            let info = parseProperty(<ts.PropertyDeclaration>prop.getDeclarations()[0]);
+            var info = parseProperty( <ts.PropertyDeclaration>prop.getDeclarations()[0]);
 
-            newInterface.properties.push({
-                name: propName,
-                tsType: info[1],
-                option: info[0]
-            });
-            if (info[0].primaryKey) {
-                newInterface.hasPrimaryKey = true;
+            if (info[2] == null) {
+                newInterface.properties.push({
+                    name: propName,
+                    tsType: info[1],
+                    option: info[0]
+                });
+                if (info[0].primaryKey) {
+                    newInterface.hasPrimaryKey = true;
+                }
+            }
+            else {
+                info[2].name = propName;
+                newInterface.relationships.push(info[2]);
             }
         }
 
@@ -119,7 +127,7 @@ export function parse(fileName: string): ParsedInfo {
         return ret;
     }
 
-    function parseProperty(decl: ts.PropertyDeclaration): [PropertyOption, ts.Type] {
+    function parseProperty(decl: ts.PropertyDeclaration): [PropertyOption, ts.Type, Relationship] {
         let ret: PropertyOption = {
             concreteType: null,
             embeded: null,
@@ -130,29 +138,50 @@ export function parse(fileName: string): ParsedInfo {
         var decorators: ts.NodeArray<ts.Decorator> = decl.decorators;
         let propType = typeChecker.getTypeAtLocation(decl.type);
         let tsType: string = tsTypeToString(propType);
-        // import
-        if (tsType in imports) {
-            let moduleName = imports[tsType];
-            if (!(moduleName in usedImports)) {
-                usedImports[moduleName] = []
+        let baseType: string = tsType.replace('[]', '');
+        let typeDecl: ts.Declaration = null;
+        let relationship: Relationship = null;
+        if (propType.symbol && (propType.flags & ts.TypeFlags.Enum) == 0) {
+            if (propType.symbol.name == "Array") {
+                if ((propType as ts.GenericType).typeArguments[0].symbol) {
+                    typeDecl = (propType as ts.GenericType).typeArguments[0].symbol.declarations[0];
+                }
             }
-            usedImports[moduleName].push(tsType);
+            else {
+                typeDecl = propType.symbol.declarations[0];
+            }
+        }
+        // import
+        if (baseType in imports) {
+            let moduleName = imports[baseType];
+            let typeDecoratorNames = _.map(typeDecl.decorators, getDecoratorName);
+            if (_.includes(typeDecoratorNames, 'model')) {
+                // model - relation
+                relationship = {
+                    type: RelationshipType.OneToMany,
+                    name : null,
+                    targetName: baseType,
+                    targetModule: moduleName
+                };
+            }
+            else {
+                if (!(moduleName in usedImports)) {
+                    usedImports[moduleName] = []
+                }
+                usedImports[moduleName].push(baseType);
+            }
         }
         // declared in same file or default
         else if (!isNodeType(tsType)) {
-            let decl: ts.Declaration = null;
-            if (propType.symbol.name == "Array") {
-                decl = (propType as ts.GenericType).typeArguments[0].symbol.declarations[0];
-            }
-            else {
-                decl = propType.symbol.declarations[0];
-            }
             if (decl.getSourceFile() == source) {
                 usedDeclaration.push({
                     name: tsType,
-                    begin: decl.pos,
-                    end: decl.end
+                    begin: typeDecl.pos,
+                    end: typeDecl.end
                 });
+            }
+            else {
+                // something wrong
             }
         }
         Object.assign(ret, parseDecorators(decorators));
@@ -165,7 +194,7 @@ export function parse(fileName: string): ParsedInfo {
             else if (ret.embeded != null) {
                 for (var embededProp of typeChecker.getPropertiesOfType(propType)) {
                     let name = embededProp.getName();
-                    let info = parseProperty(<ts.PropertyDeclaration>embededProp.getDeclarations()[0])
+                    let info = parseProperty(<ts.PropertyDeclaration>embededProp.getDeclarations()[0]);
                     ret.embeded.push({
                         name: name,
                         option: info[0],
@@ -174,7 +203,7 @@ export function parse(fileName: string): ParsedInfo {
                 }
             }
         }
-        return [ret, propType];
+        return [ret, propType, relationship];
     }
 
     function isNodeExported(node: ts.Node): boolean {
