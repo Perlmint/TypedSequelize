@@ -69,17 +69,16 @@ export function parse(fileName: string): ParsedInfo {
             let propName = prop.name;
             var info = parseProperty( <ts.PropertyDeclaration>prop.getDeclarations()[0]);
 
-            if (info[2] == null) {
-                newInterface.properties.push({
-                    name: propName,
-                    tsType: info[1],
-                    option: info[0]
-                });
-                if (info[0].primaryKey) {
-                    newInterface.hasPrimaryKey = true;
-                }
+            info[0].associated = info[2];
+            newInterface.properties.push({
+                name: propName,
+                tsType: info[1],
+                option: info[0],
+            });
+            if (info[0].primaryKey) {
+                newInterface.hasPrimaryKey = true;
             }
-            else {
+            if (info[2] != null) {
                 info[2].name = propName;
                 newInterface.relationships.push(info[2]);
             }
@@ -94,7 +93,8 @@ export function parse(fileName: string): ParsedInfo {
             embeded: null,
             internal: false,
             primaryKey: false,
-            arrayJoinedWith: null
+            arrayJoinedWith: null,
+            associated: null
         };
 
         if (decorators === undefined) {
@@ -133,7 +133,8 @@ export function parse(fileName: string): ParsedInfo {
             embeded: null,
             internal: false,
             primaryKey: false,
-            arrayJoinedWith: null
+            arrayJoinedWith: null,
+            associated: null
         };
         var decorators: ts.NodeArray<ts.Decorator> = decl.decorators;
         let propType = typeChecker.getTypeAtLocation(decl.type);

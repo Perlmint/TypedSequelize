@@ -8,6 +8,7 @@ export interface PropertyOption {
     embeded: Property[];
     primaryKey: boolean;
     arrayJoinedWith?: string;
+    associated: Relationship;
 }
 
 export interface Property {
