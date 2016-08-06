@@ -1,7 +1,15 @@
 /// <reference path="../typings/index.d.ts" />
 import * as ts from "typescript";
 
-export function tsTypeToString(t: ts.Type): string {
+export function tsTypeToString(t: ts.Type, associated: boolean = false) : string {
+    var typename = _tsTypeToString(t);
+    if (associated) {
+        typename = typename.replace(/(\[])?$/, "Interface$&");
+    }
+    return typename;
+}
+
+function _tsTypeToString(t: ts.Type): string {
     if (t.flags & ts.TypeFlags.String) {
         return "string";
     }
