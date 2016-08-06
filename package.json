@@ -1,8 +1,11 @@
 {
   "name": "typedsequelize",
-  "version": "0.1.0",
+  "version": "0.2.2",
   "description": "typescript source generator for sequelize &amp; rpc",
-  "main": "bin/cli.js",
+  "main": "./bin/cli.js",
+  "bin": {
+    "typedsequelize": "./bin/cli.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

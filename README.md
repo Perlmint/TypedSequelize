@@ -6,8 +6,9 @@ typescript source generator for sequelize &amp; rpc
 ### Model Definition
 Just declare &amp; implement class.  
 **_Not support inherit now_**  
-**_Not support relation now_**  
+**_Not support n:m relation now_**  
 ```
+@model
 export class Person {
     first_name: string;
     last_name: string;
@@ -16,11 +17,23 @@ export class Person {
 ```
 ### Source generation
 run bin/cli.js  
-`node bin/cli.js src/gen src/def/person.ts`
+`node bin/cli.js --outdir src/gen --inputs src/def/person.ts`
 
 **src/gen/person_models.ts** will be generated.
 
 Now you can use **Person** in **src/gen/person_models**.
+
+or you can use *typedseq.json* as config file.  
+below is an example that works same with above command.
+```
+{
+  "outdir": "src/gen",
+  "inputs": [
+    "src/def/person.ts"
+  ]
+}
+```
+jsut run `node bin/cli.js`
 
 ### Decorators
 - concreteType()
