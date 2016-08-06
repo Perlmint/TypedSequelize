@@ -57,17 +57,16 @@ function parse(fileName) {
         for (var prop of typeChecker.getPropertiesOfType(t)) {
             let propName = prop.name;
             var info = parseProperty(prop.getDeclarations()[0]);
-            if (info[2] == null) {
-                newInterface.properties.push({
-                    name: propName,
-                    tsType: info[1],
-                    option: info[0]
-                });
-                if (info[0].primaryKey) {
-                    newInterface.hasPrimaryKey = true;
-                }
+            info[0].associated = info[2];
+            newInterface.properties.push({
+                name: propName,
+                tsType: info[1],
+                option: info[0],
+            });
+            if (info[0].primaryKey) {
+                newInterface.hasPrimaryKey = true;
             }
-            else {
+            if (info[2] != null) {
                 info[2].name = propName;
                 newInterface.relationships.push(info[2]);
             }
@@ -80,7 +79,8 @@ function parse(fileName) {
             embeded: null,
             internal: false,
             primaryKey: false,
-            arrayJoinedWith: null
+            arrayJoinedWith: null,
+            associated: null
         };
         if (decorators === undefined) {
             return ret;
@@ -117,7 +117,8 @@ function parse(fileName) {
             embeded: null,
             internal: false,
             primaryKey: false,
-            arrayJoinedWith: null
+            arrayJoinedWith: null,
+            associated: null
         };
         var decorators = decl.decorators;
         let propType = typeChecker.getTypeAtLocation(decl.type);
