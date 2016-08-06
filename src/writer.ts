@@ -90,7 +90,7 @@ function writeInterface(stream: WriteStream, interf: Interface, name: string) {
 }
 
 function writeModelDef(stream: WriteStream, interf: Interface, name: string) {
-    stream.write(`interface ${name}Instance extends sequelize.Instance<${name}Interface>, ${name}Interface {}\n\n`);
+    stream.write(`export interface ${name}Instance extends sequelize.Instance<${name}Interface>, ${name}Interface {`);
     _.forEach(interf.relationships, (rel) => {
         let capitalizedName = _.capitalize(rel.name);
         let typeName = rel.targetName + "Interface";
