@@ -97,8 +97,8 @@ function writeModelDef(stream: WriteStream, interf: Interface, name: string) {
         switch(rel.type) {
         case RelationshipType.OneToMany:
             stream.write(`
-  get${capitalizedName}s(): Promise<${typeName}[]>;
-  set${capitalizedName}s(vals: ${typeName}[]): Promise<${typeName}[]>;
+  get${capitalizedName}(): Promise<${typeName}[]>;
+  set${capitalizedName}(vals: ${typeName}[]): Promise<${typeName}[]>;
   remove${capitalizedName}(val: ${typeName}): Promise<void>;
   add${capitalizedName}(val: ${typeName}): Promise<void>;`);
             break;
