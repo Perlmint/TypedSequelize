@@ -13,11 +13,11 @@ function _tsTypeToString(t) {
     if (t.flags & ts.TypeFlags.String) {
         return "string";
     }
+    if (t.flags & ts.TypeFlags.Number) {
+        return "number";
+    }
     if (t.flags & ts.TypeFlags.Boolean) {
         return "boolean";
-    }
-    if (t.flags & (ts.TypeFlags.Number | ts.TypeFlags.Enum)) {
-        return "number";
     }
     switch (t.getSymbol().name) {
         case "Date":

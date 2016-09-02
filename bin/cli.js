@@ -4,8 +4,8 @@ const fs_1 = require("fs");
 const path_1 = require("path");
 const argparse_1 = require("argparse");
 const _ = require("lodash");
-const parser_1 = require('./parser');
-const writer_1 = require('./writer');
+const parser_1 = require("./parser");
+const writer_1 = require("./writer");
 function watch(rootFileNames, options) {
 }
 var args = {
@@ -15,8 +15,8 @@ var args = {
     inputs: []
 };
 try {
-    fs_1.accessSync('typedseq.json');
-    args = Object.assign(args, JSON.parse(fs_1.readFileSync('typedseq.json', 'utf8')));
+    fs_1.accessSync("typedseq.json");
+    args = Object.assign(args, JSON.parse(fs_1.readFileSync("typedseq.json", "utf8")));
 }
 catch (e) {
 }
@@ -98,19 +98,20 @@ else {
     var interfaces = {};
     var interfacesByFile = {};
     args.inputs.forEach((v, i) => {
-        let srcAbsPath = path_1.isAbsolute(v) ? v : path_1.join(process.cwd(), v);
-        let parsed = parser_1.parse(srcAbsPath);
+        const srcAbsPath = path_1.isAbsolute(v) ? v : path_1.join(process.cwd(), v);
+        const parsed = parser_1.parse(srcAbsPath);
         _.assign(interfaces, parsed.interfaces);
         interfacesByFile[srcAbsPath] = parsed;
     });
     _.forEach(interfacesByFile, (v, k) => {
-        let basefilename = path_1.basename(k, '.ts');
-        let outName = basefilename + '_models', outTypesName = basefilename + '_types';
+        const basefilename = path_1.basename(k, ".ts");
+        const outName = `${basefilename}_models`;
+        const outTypesName = `${basefilename}_types`;
         writer_1.writeModel(v, {
             outDir: args.outdir,
-            outStream: fs_1.createWriteStream(path_1.join(args.outdir, outName + '.ts')),
+            outStream: fs_1.createWriteStream(path_1.join(args.outdir, `${outName}.ts`)),
             outName: outName,
-            outTypesStream: fs_1.createWriteStream(path_1.join(args.outdir, outTypesName + '.ts')),
+            outTypesStream: fs_1.createWriteStream(path_1.join(args.outdir, `${outTypesName}.ts`)),
             outTypesName: outTypesName,
             rootDir: args.rootdir,
             srcPath: k
