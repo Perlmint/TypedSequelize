@@ -143,7 +143,7 @@ export function parse(fileName: string): ParsedInfo {
         let typeDecl: ts.Declaration = null;
         let relationship: Relationship = null;
         let isArray: boolean = false;
-        if (propType.symbol && (propType.flags & ts.TypeFlags.Enum) == 0) {
+        if (propType.symbol) {
             if (propType.symbol.name == "Array") {
                 isArray = true;
                 if ((propType as ts.GenericType).typeArguments[0].symbol) {
@@ -173,9 +173,17 @@ export function parse(fileName: string): ParsedInfo {
                 }
                 usedImports[moduleName].push(baseType);
             }
+            else if (typeDecl.getSourceFile() == source) {
+                usedDeclaration.push({
+                    name: tsType,
+                    begin: typeDecl.pos,
+                    end: typeDecl.end
+                });
+            }
         }
         // declared in same file or default
         else if (!isNodeType(tsType)) {
+            console.log(decl);
             if (decl.getSourceFile() == source) {
                 usedDeclaration.push({
                     name: tsType,
@@ -204,6 +212,8 @@ export function parse(fileName: string): ParsedInfo {
                         tsType: info[1]
                     });
                 }
+            } else if (propType.flags & ts.TypeFlags.Enum) {
+                ret.concreteType = DBTypes.Int;
             }
         }
         return [ret, propType, relationship];

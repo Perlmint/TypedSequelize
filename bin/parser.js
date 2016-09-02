@@ -127,7 +127,7 @@ function parse(fileName) {
         let typeDecl = null;
         let relationship = null;
         let isArray = false;
-        if (propType.symbol && (propType.flags & ts.TypeFlags.Enum) == 0) {
+        if (propType.symbol) {
             if (propType.symbol.name == "Array") {
                 isArray = true;
                 if (propType.typeArguments[0].symbol) {
@@ -157,8 +157,16 @@ function parse(fileName) {
                 }
                 usedImports[moduleName].push(baseType);
             }
+            else if (typeDecl.getSourceFile() == source) {
+                usedDeclaration.push({
+                    name: tsType,
+                    begin: typeDecl.pos,
+                    end: typeDecl.end
+                });
+            }
         }
         else if (!isNodeType(tsType)) {
+            console.log(decl);
             if (decl.getSourceFile() == source) {
                 usedDeclaration.push({
                     name: tsType,
@@ -185,6 +193,9 @@ function parse(fileName) {
                         tsType: info[1]
                     });
                 }
+            }
+            else if (propType.flags & ts.TypeFlags.Enum) {
+                ret.concreteType = decorator_1.DBTypes.Int;
             }
         }
         return [ret, propType, relationship];

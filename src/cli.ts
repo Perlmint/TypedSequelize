@@ -6,11 +6,11 @@ import {basename, join, relative, sep, normalize,
 import * as ts from "typescript";
 import {ArgumentParser} from "argparse";
 import * as _ from "lodash";
-import {parse} from './parser';
-import {writeModel, WriteInfo} from './writer';
-import {InterfaceMap, ParsedInfo} from './types';
+import {parse} from "./parser";
+import {writeModel, WriteInfo} from "./writer";
+import {InterfaceMap, ParsedInfo} from "./types";
 
-interface options {
+interface IOptions {
     outdir: string
     rootdir: string
     inputs: string[],
@@ -20,7 +20,7 @@ interface options {
 function watch(rootFileNames: string[], options: ts.CompilerOptions) {
 }
 
-var args: options = {
+var args: IOptions = {
     outdir: "",
     rootdir: "",
     watch: false,
@@ -28,8 +28,8 @@ var args: options = {
 };
 
 try {
-    accessSync('typedseq.json');
-    args = Object.assign(args, JSON.parse(readFileSync('typedseq.json', 'utf8')));
+    accessSync("typedseq.json");
+    args = Object.assign(args, JSON.parse(readFileSync("typedseq.json", "utf8")));
 }
 catch (e) {
 }
@@ -93,7 +93,7 @@ parser.addArgument(
     }
 );
 
-var parsedArgs: options = parser.parseArgs();
+var parsedArgs: IOptions = parser.parseArgs();
 if (parsedArgs.inputs) {
     args.inputs = parsedArgs.inputs;
 }
@@ -133,19 +133,20 @@ if (args.watch) {
     var interfaces: InterfaceMap = {};
     var interfacesByFile: ts.Map<ParsedInfo> = {};
     (<string[]>args.inputs).forEach((v, i) => {
-        let srcAbsPath = isAbsolute(v) ? v : join(process.cwd(), v);
-        let parsed = parse(srcAbsPath);
+        const srcAbsPath = isAbsolute(v) ? v : join(process.cwd(), v);
+        const parsed = parse(srcAbsPath);
         _.assign(interfaces, parsed.interfaces);
         interfacesByFile[srcAbsPath] = parsed;
     });
     _.forEach(interfacesByFile, (v, k) => {
-        let basefilename = basename(k, '.ts');
-        let outName = basefilename + '_models', outTypesName = basefilename + '_types';
+        const basefilename = basename(k, ".ts");
+        const outName = `${basefilename}_models`;
+        const outTypesName = `${basefilename}_types`;
         writeModel(v, {
             outDir: args.outdir,
-            outStream: createWriteStream(join(args.outdir, outName + '.ts')),
+            outStream: createWriteStream(join(args.outdir, `${outName}.ts`)),
             outName: outName,
-            outTypesStream: createWriteStream(join(args.outdir, outTypesName + '.ts')),
+            outTypesStream: createWriteStream(join(args.outdir, `${outTypesName}.ts`)),
             outTypesName: outTypesName,
             rootDir: args.rootdir,
             srcPath: k
