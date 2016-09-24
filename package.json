@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "release": "git checkout master && git merge dev && tsc && git add bin/* && git commit -mbin"
+    "release": "git checkout master && git merge dev && tsc && git add --force bin/* && git commit -mbin"
   },
   "repository": {
     "type": "git",
