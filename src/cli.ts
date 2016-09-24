@@ -7,14 +7,14 @@ import * as ts from "typescript";
 import {ArgumentParser} from "argparse";
 import * as _ from "lodash";
 import {parse} from "./parser";
-import {writeModel, WriteInfo} from "./writer";
+import {writeModel, IWriteInfo} from "./writer";
 import {InterfaceMap, ParsedInfo} from "./types";
 
 interface IOptions {
-    outdir: string
-    rootdir: string
-    inputs: string[],
-    watch: boolean
+    outdir: string;
+    rootdir: string;
+    inputs: string[];
+    watch: boolean;
 }
 
 function watch(rootFileNames: string[], options: ts.CompilerOptions) {
@@ -29,7 +29,7 @@ var args: IOptions = {
 
 try {
     accessSync("typedseq.json");
-    args = Object.assign(args, JSON.parse(readFileSync("typedseq.json", "utf8")));
+    args = _.assign(args, JSON.parse(readFileSync("typedseq.json", "utf8"))) as any;
 }
 catch (e) {
 }
@@ -110,14 +110,14 @@ catch (e) {
 
 // inference rootdir
 if (args.rootdir === null) {
-    var normalized = normalize((<string[]>args.inputs)[0]);
+    var normalized = normalize((args.inputs)[0]);
     if (!isAbsolute(normalized)) {
         normalized = join(process.cwd(), normalized);
     }
     var samplePath = parsePath(normalized);
     while(samplePath.root !== samplePath.dir) {
         try {
-            accessSync(join(samplePath.dir, 'typings'));
+            accessSync(join(samplePath.dir, "typings"));
             args.rootdir = samplePath.dir;
             break;
         }
@@ -132,7 +132,7 @@ if (args.watch) {
 } else {
     var interfaces: InterfaceMap = {};
     var interfacesByFile: ts.Map<ParsedInfo> = {};
-    (<string[]>args.inputs).forEach((v, i) => {
+    (args.inputs).forEach((v) => {
         const srcAbsPath = isAbsolute(v) ? v : join(process.cwd(), v);
         const parsed = parse(srcAbsPath);
         _.assign(interfaces, parsed.interfaces);

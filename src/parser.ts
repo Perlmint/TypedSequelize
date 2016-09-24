@@ -7,13 +7,18 @@ import {InterfaceMap, ParsedInfo, Property, PropertyOption, Interface,
 import {tsTypeToString} from "./util";
 
 function getDecoratorName(decorator: ts.Decorator): string {
+    
     switch (decorator.expression.kind) {
         case ts.SyntaxKind.Identifier:
-            let id = (<ts.Identifier>decorator.expression);
-            return id.text;
+            {
+                const id = (decorator.expression as ts.Identifier);
+                return id.text;
+            }
         case ts.SyntaxKind.CallExpression:
-            let call = (<ts.CallExpression>decorator.expression);
-            return (<ts.Identifier>call.expression).text;
+            {
+                const call = (decorator.expression as ts.CallExpression);
+                return (call.expression as ts.Identifier).text;
+            }
     }
     return null;
 }
@@ -21,7 +26,7 @@ function getDecoratorName(decorator: ts.Decorator): string {
 function getDecoratorArgs(decorator: ts.Decorator): ts.Expression[] {
     if (decorator.expression.kind === ts.SyntaxKind.CallExpression) {
         const call = (decorator.expression as ts.CallExpression);
-        return call.arguments.map<ts.Expression>((v, i) => { return v; });
+        return call.arguments.map<ts.Expression>((v) => { return v; });
     }
     return [];
 }
@@ -37,9 +42,9 @@ export function parse(fileName: string): ParsedInfo {
     var imports: ts.Map<string> = {};
     var usedImports: ts.Map<string[]> = {};
     var usedDeclaration: {
-        name: string
-        begin: number
-        end: number
+        name: string;
+        begin: number;
+        end: number;
     }[] = [];
     ts.forEachChild(source, visit);
 
@@ -57,8 +62,8 @@ export function parse(fileName: string): ParsedInfo {
 
         // only model exports
         if (node.decorators == null ||
-            node.decorators.findIndex(
-                (d: ts.Decorator) => getDecoratorName(d) == "model") == -1) {
+            _.findIndex(node.decorators,
+                (d: ts.Decorator) => getDecoratorName(d) === "model") === -1) {
             return;
         }
 
@@ -67,22 +72,23 @@ export function parse(fileName: string): ParsedInfo {
         let newInterface: Interface = {
             name: name,
             properties: [],
-            createdAt: 'createdAt',
+            createdAt: "createdAt",
             deletedAt: null,
-            updatedAt: 'updatedAt',
+            updatedAt: "updatedAt",
             hasPrimaryKey: false,
             relationships: [],
             indexes: {}
         };
-        for (var prop of typeChecker.getPropertiesOfType(t)) {
-            let propName = prop.name;
-            var info = parseProperty( <ts.PropertyDeclaration>prop.getDeclarations()[0]);
+        for (let prop of typeChecker.getPropertiesOfType(t)) {
+            const propName = prop.name;
+            const info = parseProperty(prop.getDeclarations()[0] as ts.PropertyDeclaration);
 
             info[0].associated = info[2];
+            const [option, tsType] = info;
             newInterface.properties.push({
                 name: propName,
-                tsType: info[1],
-                option: info[0],
+                tsType,
+                option
             });
             if (info[0].primaryKey) {
                 newInterface.hasPrimaryKey = true;
@@ -120,19 +126,19 @@ export function parse(fileName: string): ParsedInfo {
             let name: string = getDecoratorName(decorator);
             const args = getDecoratorArgs(decorator);
             switch (name) {
-            case 'internal':
+            case "internal":
                 ret.internal = true;
                 break;
-            case 'concreteType':
+            case "concreteType":
                 ret.concreteType = DBTypes[(<ts.PropertyAccessExpression>args[0]).name.text];
                 break;
-            case 'embededField':
+            case "embededField":
                 ret.embeded = [];
                 break;
-            case 'primaryKey':
+            case "primaryKey":
                 ret.primaryKey = true;
                 break;
-            case 'arrayJoinedWith':
+            case "arrayJoinedWith":
                 ret.arrayJoinedWith = (<ts.StringLiteral>args[0]).text;
                 break;
             }
@@ -149,16 +155,16 @@ export function parse(fileName: string): ParsedInfo {
             arrayJoinedWith: null,
             associated: null
         };
-        var decorators: ts.NodeArray<ts.Decorator> = decl.decorators;
+        var decorators = decl.decorators;
         let propType = typeChecker.getTypeAtLocation(decl.type);
         let tsType: string = tsTypeToString(propType);
-        let baseType: string = tsType.replace('[]', '');
+        let baseType: string = tsType.replace("[]", "");
         let typeDecl: ts.Declaration = null;
         let relationship: Relationship = null;
         let index: string = null;
         let isArray: boolean = false;
         if (propType.symbol) {
-            if (propType.symbol.name == "Array") {
+            if (propType.symbol.name === "Array") {
                 isArray = true;
                 if ((propType as ts.GenericType).typeArguments[0].symbol) {
                     typeDecl = (propType as ts.GenericType).typeArguments[0].symbol.declarations[0];
@@ -178,7 +184,7 @@ export function parse(fileName: string): ParsedInfo {
         if (typeDecl) {
             let moduleName = imports[baseType];
             let typeDecoratorNames = _.map(typeDecl.decorators, getDecoratorName);
-            if (_.includes(typeDecoratorNames, 'model')) {
+            if (_.includes(typeDecoratorNames, "model")) {
                 // model - relation
                 relationship = {
                     type: isArray?RelationshipType.OneToMany:RelationshipType.ManyToOne,
@@ -189,11 +195,11 @@ export function parse(fileName: string): ParsedInfo {
             }
             else if (baseType in imports) {
                 if (!(moduleName in usedImports)) {
-                    usedImports[moduleName] = []
+                    usedImports[moduleName] = [];
                 }
                 usedImports[moduleName].push(baseType);
             }
-            else if (typeDecl.getSourceFile() == source) {
+            else if (typeDecl.getSourceFile() === source) {
                 usedDeclaration.push({
                     name: tsType,
                     begin: typeDecl.pos,
@@ -204,18 +210,15 @@ export function parse(fileName: string): ParsedInfo {
         // declared in same file or default
         else if (!isNodeType(tsType)) {
             console.log(decl);
-            if (decl.getSourceFile() == source) {
+            if (decl.getSourceFile() === source) {
                 usedDeclaration.push({
                     name: tsType,
                     begin: typeDecl.pos,
                     end: typeDecl.end
                 });
             }
-            else {
-                // something wrong
-            }
         }
-        Object.assign(ret, parseDecorators(decorators));
+        _.assign(ret, parseDecorators(decorators));
 
         // fill concreteType
         if (ret.concreteType == null) {
@@ -239,23 +242,19 @@ export function parse(fileName: string): ParsedInfo {
         return [ret, propType, relationship, index];
     }
 
-    function isNodeExported(node: ts.Node): boolean {
-        return (node.flags & ts.NodeFlags.Export) !== 0;
-    }
-
     function isNodeType(typename: string): boolean {
-        return _.includes(['string', 'number', 'boolean', 'Date'],
+        return _.includes(["string", "number", "boolean", "Date"],
                           typename.replace("[]",""));
     }
 
-    let declarations: {[key:string]:string} = {};
+    const declarations: {[key:string]:string} = {};
     _.forEach(usedDeclaration, (declInfo) => {
         if (interfaces[declInfo.name]) {
             return;
         }
         var code = source.text.slice(declInfo.begin, declInfo.end).trim();
-        if (!code.startsWith('export')) {
-            code = 'export ' + code;
+        if (!code.startsWith("export")) {
+            code = `export ${code}`;
         }
         declarations[declInfo.name] = code;
     });
