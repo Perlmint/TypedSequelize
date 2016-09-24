@@ -1,0 +1,6 @@
+*.*~
+node_modules
+example
+typings
+.gitignore
+.gitattribute
