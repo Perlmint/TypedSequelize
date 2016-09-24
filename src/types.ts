@@ -31,6 +31,11 @@ export interface Relationship {
     name: string;
 };
 
+export interface IndexInfo {
+    unique: boolean;
+    fields: string[];
+}
+
 export interface Interface {
     name: string;
     properties: Property[];
@@ -39,6 +44,7 @@ export interface Interface {
     updatedAt: boolean | string;
     deletedAt: boolean | string;
     relationships: Relationship[];
+    indexes: {[key:string]:IndexInfo};
 };
 
 export type InterfaceMap = ts.Map<Interface>;

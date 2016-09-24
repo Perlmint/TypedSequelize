@@ -3,7 +3,7 @@ import * as ts from "typescript";
 import {DBTypes, SequelizeMap, DefaultDBType} from "./decorator";
 import * as _ from "lodash";
 import {InterfaceMap, ParsedInfo, Property, PropertyOption, Interface,
-        RelationshipType, Relationship} from "./types";
+        RelationshipType, Relationship, IndexInfo} from "./types";
 import {tsTypeToString} from "./util";
 
 function getDecoratorName(decorator: ts.Decorator): string {
@@ -16,6 +16,14 @@ function getDecoratorName(decorator: ts.Decorator): string {
             return (<ts.Identifier>call.expression).text;
     }
     return null;
+}
+
+function getDecoratorArgs(decorator: ts.Decorator): ts.Expression[] {
+    if (decorator.expression.kind === ts.SyntaxKind.CallExpression) {
+        const call = (decorator.expression as ts.CallExpression);
+        return call.arguments.map<ts.Expression>((v, i) => { return v; });
+    }
+    return [];
 }
 
 export function parse(fileName: string): ParsedInfo {
@@ -63,7 +71,8 @@ export function parse(fileName: string): ParsedInfo {
             deletedAt: null,
             updatedAt: 'updatedAt',
             hasPrimaryKey: false,
-            relationships: []
+            relationships: [],
+            indexes: {}
         };
         for (var prop of typeChecker.getPropertiesOfType(t)) {
             let propName = prop.name;
@@ -81,6 +90,13 @@ export function parse(fileName: string): ParsedInfo {
             if (info[2] != null) {
                 info[2].name = propName;
                 newInterface.relationships.push(info[2]);
+            }
+            if (info[3] !== null) {
+                let index = newInterface.indexes[info[3]];
+                if (index == null) {
+                    index = newInterface.indexes[info[3]] = {unique: false, fields: []};
+                }
+                index.fields.push(propName);
             }
         }
 
@@ -101,11 +117,8 @@ export function parse(fileName: string): ParsedInfo {
             return ret;
         }
         for (var decorator of decorators) {
-            let name: string = getDecoratorName(decorator), args: ts.Expression[] = [];
-            if (decorator.expression.kind == ts.SyntaxKind.CallExpression) {
-                let call = (<ts.CallExpression>decorator.expression);
-                args = call.arguments.map<ts.Expression>((v, i) => {return v;});
-            }
+            let name: string = getDecoratorName(decorator);
+            const args = getDecoratorArgs(decorator);
             switch (name) {
             case 'internal':
                 ret.internal = true;
@@ -127,7 +140,7 @@ export function parse(fileName: string): ParsedInfo {
         return ret;
     }
 
-    function parseProperty(decl: ts.PropertyDeclaration): [PropertyOption, ts.Type, Relationship] {
+    function parseProperty(decl: ts.PropertyDeclaration): [PropertyOption, ts.Type, Relationship, string] {
         let ret: PropertyOption = {
             concreteType: null,
             embeded: null,
@@ -142,6 +155,7 @@ export function parse(fileName: string): ParsedInfo {
         let baseType: string = tsType.replace('[]', '');
         let typeDecl: ts.Declaration = null;
         let relationship: Relationship = null;
+        let index: string = null;
         let isArray: boolean = false;
         if (propType.symbol) {
             if (propType.symbol.name == "Array") {
@@ -153,6 +167,12 @@ export function parse(fileName: string): ParsedInfo {
             else {
                 typeDecl = propType.symbol.declarations[0];
             }
+        }
+
+        const indexInfo = _.find(decorators, (dec) => getDecoratorName(dec) === "Index");
+        if (indexInfo !== undefined) {
+            const args = getDecoratorArgs(indexInfo);
+            index = (args[0] as ts.StringLiteral).text;
         }
         // import
         if (typeDecl) {
@@ -216,7 +236,7 @@ export function parse(fileName: string): ParsedInfo {
                 ret.concreteType = DBTypes.Int;
             }
         }
-        return [ret, propType, relationship];
+        return [ret, propType, relationship, index];
     }
 
     function isNodeExported(node: ts.Node): boolean {

@@ -123,6 +123,16 @@ function writeModelDef(stream: WriteStream, interf: Interface, name: string) {
     stream.write(
         _.filter(_.map(interf.properties, (prop) => makeProperty(prop))).join(',\n'));
     stream.write("\n");
+    stream.write("    indexes: [\n");
+    stream.write(
+        _.map(interf.indexes, (index) => {
+            const fields = index.fields.map((d) => `"${d}"`).join(", ");
+            return `      {
+        fields: [${fields}]
+      }`;
+        }).join(",\n")
+    );
+    stream.write("    ]");
     stream.write("  }, {");
     let embeded = _.filter(interf.properties, (prop) => {
         return !prop.option.embeded;
