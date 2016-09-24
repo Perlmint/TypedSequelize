@@ -1,24 +1,24 @@
 "use strict";
 /// <reference path="../typings/index.d.ts" />
-const types_1 = require('./types');
-const path_1 = require('path');
-const util_1 = require('./util');
-const decorator_1 = require('./decorator');
+const types_1 = require("./types");
+const path_1 = require("path");
+const util_1 = require("./util");
+const decorator_1 = require("./decorator");
 const _ = require("lodash");
 ;
 function makeProperty(prop, prefix = "") {
     if (prefix !== "") {
         prefix += "_";
     }
-    let name = prefix + prop.name;
+    const name = prefix + prop.name;
     let propDef = `    '${name}': {
       type: sequelize.`;
     let getter = null, setter = null, concreteType;
     if (prop.option.embeded !== null) {
         propDef = _.map(prop.option.embeded, (embeded) => makeProperty(embeded, name)).concat(propDef).join(",\n");
         concreteType = "VIRTUAL";
-        getter = "        return {\n" + _.map(prop.option.embeded, (embeded) => `          '${embeded.name}': this.get('${name}_${embeded.name}')`).join(',\n') + "\n        };";
-        setter = _.map(prop.option.embeded, (embeded) => `        this.setDataValue('${name}_${embeded.name}', val.${embeded.name});`).join('\n');
+        getter = "        return {\n" + _.map(prop.option.embeded, (embeded) => `          '${embeded.name}': this.get('${name}_${embeded.name}')`).join(",\n") + "\n        };";
+        setter = _.map(prop.option.embeded, (embeded) => `        this.setDataValue('${name}_${embeded.name}', val.${embeded.name});`).join("\n");
     }
     else if (prop.option.arrayJoinedWith !== null) {
         concreteType = "STRING";
@@ -35,7 +35,7 @@ function makeProperty(prop, prefix = "") {
     if (prop.option.primaryKey) {
         propDef += ",\n      primaryKey: true";
     }
-    var typename = util_1.tsTypeToString(prop.tsType, prop.option.associated !== null);
+    const typename = util_1.tsTypeToString(prop.tsType, prop.option.associated !== null);
     if (getter !== null) {
         propDef += `,
       get: function(): ${typename} {
@@ -75,8 +75,8 @@ function writeInterface(stream, interf, name) {
 function writeModelDef(stream, interf, name) {
     stream.write(`export interface ${name}Instance extends sequelize.Instance<${name}Interface>, ${name}Interface {`);
     _.forEach(interf.relationships, (rel) => {
-        let capitalizedName = _.capitalize(rel.name);
-        let typeName = rel.targetName + "Interface";
+        const capitalizedName = _.capitalize(rel.name);
+        const typeName = rel.targetName + "Interface";
         switch (rel.type) {
             case types_1.RelationshipType.OneToMany:
                 stream.write(`
@@ -103,21 +103,26 @@ function writeModelDef(stream, interf, name) {
 
 `);
     stream.write(`  ${name} = <${name}Model>seq.define<${name}Instance, ${name}Interface>('${name}', {\n`);
-    stream.write(_.filter(_.map(interf.properties, (prop) => makeProperty(prop))).join(',\n'));
+    stream.write(_.filter(_.map(interf.properties, (prop) => makeProperty(prop))).join(",\n"));
     stream.write("\n");
+    stream.write("    indexes: [\n");
+    stream.write(_.map(interf.indexes, (index) => {
+        const fields = index.fields.map((d) => `"${d}"`).join(", ");
+        return `      {
+        fields: [${fields}]
+      }`;
+    }).join(",\n"));
+    stream.write("    ]");
     stream.write("  }, {");
-    let embeded = _.filter(interf.properties, (prop) => {
-        return !prop.option.embeded;
-    });
     stream.write("  });\n");
     _.forEach(interf.relationships, (rel) => {
-        var module_name = "";
+        let moduleName = "";
         if (rel.targetModule != undefined) {
-            module_name = `require('${rel.targetModule}_models').`;
+            moduleName = `require('${rel.targetModule}_models').`;
         }
         stream.write(`
   // for setup relation. can't use import in funcion scope
-  var ${rel.targetName} = ${module_name}init${rel.targetName}(seq);`);
+  var ${rel.targetName} = ${moduleName}init${rel.targetName}(seq);`);
         switch (rel.type) {
             case types_1.RelationshipType.OneToMany:
                 stream.write(`
@@ -137,11 +142,11 @@ function writeModelDef(stream, interf, name) {
 `);
 }
 function writeModel(info, writeInfo) {
-    let stream = writeInfo.outStream;
+    const stream = writeInfo.outStream;
     // write typings reference
-    let typings_path = path_1.relative(writeInfo.outDir, path_1.join(writeInfo.rootDir, "typings/index.d.ts"))
+    const typingsPath = path_1.relative(writeInfo.outDir, path_1.join(writeInfo.rootDir, "typings/index.d.ts"))
         .replace(new RegExp("\\\\", "g"), "/");
-    stream.write(`/// <reference path="${typings_path}" />\n\n`);
+    stream.write(`/// <reference path="${typingsPath}" />\n\n`);
     // write dependency - sequelize
     stream.write("import * as sequelize from 'sequelize';\n\n");
     // write dependencies - user defined types
@@ -151,8 +156,8 @@ function writeModel(info, writeInfo) {
                 moduleName = path_1.relative(writeInfo.outDir, path_1.join(path_1.dirname(writeInfo.srcPath), moduleName))
                     .replace(new RegExp("\\\\", "g"), "/");
             }
-            let joined_items = _.uniq(items).join(", ");
-            stream.write(`import { ${joined_items} } from '${moduleName}';\n`);
+            const joinedItems = _.uniq(items).join(", ");
+            stream.write(`import { ${joinedItems} } from '${moduleName}';\n`);
         });
         stream.write("\n");
     }
@@ -163,7 +168,7 @@ function writeModel(info, writeInfo) {
         writeInfo.outTypesStream.write("\n\n");
     });
     var relationDeps = {};
-    _.forEach(_.flatten(_.map(info.interfaces, 'relationships')), (rel) => {
+    _.forEach(_.flatten(_.map(info.interfaces, "relationships")), (rel) => {
         if (rel.targetModule === undefined) {
             return;
         }
@@ -173,17 +178,17 @@ function writeModel(info, writeInfo) {
         relationDeps[rel.targetModule].push(rel.targetName);
     });
     _.forEach(_.sortBy(_.keys(relationDeps)), (moduleName) => {
-        var joined_items = _.uniq(_.sortBy(_.map(relationDeps[moduleName], (v) => v + "Interface"))).join(", ");
+        var joinedItems = _.uniq(_.sortBy(_.map(relationDeps[moduleName], (v) => v + "Interface"))).join(", ");
         var importStr = `
-import { ${joined_items} } from '${moduleName}_types';`;
+import { ${joinedItems} } from '${moduleName}_types';`;
         stream.write(importStr);
     });
     writeInfo.outTypesStream.write("\n");
     _.forEach(info.interfaces, writeInterface.bind(null, writeInfo.outTypesStream));
-    stream.write('import {');
+    stream.write("import {");
     stream.write(_.map(info.interfaces, (i) => `${i.name}Interface`)
         .concat(_.keys(info.declarations))
-        .join(', '));
+        .join(", "));
     stream.write(`} from './${writeInfo.outTypesName}';\n\n`);
     _.forEach(info.interfaces, writeModelDef.bind(null, stream));
     // write init function

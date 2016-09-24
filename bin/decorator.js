@@ -116,3 +116,7 @@ function model() {
     return Reflect.metadata("Model", null);
 }
 exports.model = model;
+function index(name, uniq) {
+    return Reflect.metadata("Index", name);
+}
+exports.index = index;

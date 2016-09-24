@@ -16,7 +16,7 @@ var args = {
 };
 try {
     fs_1.accessSync("typedseq.json");
-    args = Object.assign(args, JSON.parse(fs_1.readFileSync("typedseq.json", "utf8")));
+    args = _.assign(args, JSON.parse(fs_1.readFileSync("typedseq.json", "utf8")));
 }
 catch (e) {
 }
@@ -75,14 +75,14 @@ catch (e) {
 }
 // inference rootdir
 if (args.rootdir === null) {
-    var normalized = path_1.normalize(args.inputs[0]);
+    var normalized = path_1.normalize((args.inputs)[0]);
     if (!path_1.isAbsolute(normalized)) {
         normalized = path_1.join(process.cwd(), normalized);
     }
     var samplePath = path_1.parse(normalized);
     while (samplePath.root !== samplePath.dir) {
         try {
-            fs_1.accessSync(path_1.join(samplePath.dir, 'typings'));
+            fs_1.accessSync(path_1.join(samplePath.dir, "typings"));
             args.rootdir = samplePath.dir;
             break;
         }
@@ -97,7 +97,7 @@ if (args.watch) {
 else {
     var interfaces = {};
     var interfacesByFile = {};
-    args.inputs.forEach((v, i) => {
+    (args.inputs).forEach((v) => {
         const srcAbsPath = path_1.isAbsolute(v) ? v : path_1.join(process.cwd(), v);
         const parsed = parser_1.parse(srcAbsPath);
         _.assign(interfaces, parsed.interfaces);
