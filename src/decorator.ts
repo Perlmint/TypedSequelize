@@ -129,3 +129,7 @@ export function findOne<T>(query: T|{}): T {
 export function model() {
     return Reflect.metadata("Model", null);
 }
+
+export function index(name?: string, uniq?: boolean) {
+    return Reflect.metadata("Index", name);
+}
