@@ -104,6 +104,7 @@ function writeModelDef(stream, interf, name) {
 `);
     stream.write(`  ${name} = <${name}Model>seq.define<${name}Instance, ${name}Interface>('${name}', {\n`);
     stream.write(_.filter(_.map(interf.properties, (prop) => makeProperty(prop))).join(",\n"));
+    stream.write("  }, {");
     stream.write("\n");
     stream.write("    indexes: [\n");
     stream.write(_.map(interf.indexes, (index) => {
@@ -113,7 +114,6 @@ function writeModelDef(stream, interf, name) {
       }`;
     }).join(",\n"));
     stream.write("    ]");
-    stream.write("  }, {");
     stream.write("  });\n");
     _.forEach(interf.relationships, (rel) => {
         let moduleName = "";
