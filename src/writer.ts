@@ -122,6 +122,7 @@ function writeModelDef(stream: WriteStream, interf: Interface, name: string) {
     stream.write(`  ${name} = <${name}Model>seq.define<${name}Instance, ${name}Interface>('${name}', {\n`);
     stream.write(
         _.filter(_.map(interf.properties, (prop) => makeProperty(prop))).join(",\n"));
+    stream.write("  }, {");
     stream.write("\n");
     stream.write("    indexes: [\n");
     stream.write(
@@ -133,7 +134,6 @@ function writeModelDef(stream: WriteStream, interf: Interface, name: string) {
         }).join(",\n")
     );
     stream.write("    ]");
-    stream.write("  }, {");
     stream.write("  });\n");
     _.forEach(interf.relationships, (rel) => {
         let moduleName = "";
