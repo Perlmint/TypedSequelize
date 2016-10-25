@@ -69,6 +69,9 @@ function parse(fileName) {
         for (let prop of typeChecker.getPropertiesOfType(t)) {
             const propName = prop.name;
             const info = parseProperty(prop.getDeclarations()[0]);
+            if (info == null) {
+                continue;
+            }
             info[0].associated = info[2];
             const [option, tsType] = info;
             newInterface.properties.push({
@@ -137,6 +140,9 @@ function parse(fileName) {
             arrayJoinedWith: null,
             associated: null
         };
+        if (decl.kind == ts.SyntaxKind.MethodDeclaration) {
+            return;
+        }
         var decorators = decl.decorators;
         let propType = typeChecker.getTypeAtLocation(decl.type);
         let tsType = util_1.tsTypeToString(propType);
@@ -208,6 +214,9 @@ function parse(fileName) {
                 for (var embededProp of typeChecker.getPropertiesOfType(propType)) {
                     let name = embededProp.getName();
                     let info = parseProperty(embededProp.getDeclarations()[0]);
+                    if (info == null) {
+                        continue;
+                    }
                     ret.embeded.push({
                         name: name,
                         option: info[0],
