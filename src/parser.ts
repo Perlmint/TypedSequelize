@@ -39,8 +39,8 @@ export function parse(fileName: string): ParsedInfo {
     var typeChecker = program.getTypeChecker();
     var interfaces : InterfaceMap = {};
 
-    var imports: ts.Map<string> = {};
-    var usedImports: ts.Map<string[]> = {};
+    var imports: {[key:string]:string} = {};
+    var usedImports: {[key:string]:string[]} = {};
     var usedDeclaration: {
         name: string;
         begin: number;
