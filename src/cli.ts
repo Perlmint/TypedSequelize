@@ -131,7 +131,7 @@ if (args.watch) {
     watch(args.inputs, {});
 } else {
     var interfaces: InterfaceMap = {};
-    var interfacesByFile: ts.Map<ParsedInfo> = {};
+    var interfacesByFile: {[key:string]:ParsedInfo} = {};
     (args.inputs).forEach((v) => {
         const srcAbsPath = isAbsolute(v) ? v : join(process.cwd(), v);
         const parsed = parse(srcAbsPath);

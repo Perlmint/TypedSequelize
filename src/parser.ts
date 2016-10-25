@@ -39,8 +39,8 @@ export function parse(fileName: string): ParsedInfo {
     var typeChecker = program.getTypeChecker();
     var interfaces : InterfaceMap = {};
 
-    var imports: ts.Map<string> = {};
-    var usedImports: ts.Map<string[]> = {};
+    var imports: {[key:string]:string} = {};
+    var usedImports: {[key:string]:string[]} = {};
     var usedDeclaration: {
         name: string;
         begin: number;
@@ -82,6 +82,9 @@ export function parse(fileName: string): ParsedInfo {
         for (let prop of typeChecker.getPropertiesOfType(t)) {
             const propName = prop.name;
             const info = parseProperty(prop.getDeclarations()[0] as ts.PropertyDeclaration);
+            if (info == null) {
+                continue;
+            }
 
             info[0].associated = info[2];
             const [option, tsType] = info;
@@ -155,6 +158,9 @@ export function parse(fileName: string): ParsedInfo {
             arrayJoinedWith: null,
             associated: null
         };
+        if (decl.kind == ts.SyntaxKind.MethodDeclaration) {
+            return;
+        }
         var decorators = decl.decorators;
         let propType = typeChecker.getTypeAtLocation(decl.type);
         let tsType: string = tsTypeToString(propType);
@@ -229,6 +235,9 @@ export function parse(fileName: string): ParsedInfo {
                 for (var embededProp of typeChecker.getPropertiesOfType(propType)) {
                     let name = embededProp.getName();
                     let info = parseProperty(<ts.PropertyDeclaration>embededProp.getDeclarations()[0]);
+                    if (info == null) {
+                        continue;
+                    }
                     ret.embeded.push({
                         name: name,
                         option: info[0],
