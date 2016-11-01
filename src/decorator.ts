@@ -53,13 +53,14 @@ export const DefaultDBType: Map<string, DBTypes> = new Map([
     ["string", DBTypes.Varchar],
     ["number", DBTypes.Int],
     ["Date", DBTypes.Datetime],
-    ["Buffer", DBTypes.Blob]
+    ["Buffer", DBTypes.Blob],
+    ["boolean", DBTypes.Tinyint]
 ]);
 
 export var SequelizeMap: {[key:number]:string} = (() => {
     let ret: {[key:number]:string} = {};
 
-    ret[DBTypes.Tinyint] = 'INTEGER';
+    ret[DBTypes.Tinyint] = 'INTEGER(1)';
 
     ret[DBTypes.Smallint] = 'INTEGER';
     ret[DBTypes.Int] = 'INTEGER';
