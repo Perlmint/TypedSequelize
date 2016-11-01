@@ -48,11 +48,12 @@ exports.DefaultDBType = new Map([
     ["string", DBTypes.Varchar],
     ["number", DBTypes.Int],
     ["Date", DBTypes.Datetime],
-    ["Buffer", DBTypes.Blob]
+    ["Buffer", DBTypes.Blob],
+    ["boolean", DBTypes.Tinyint]
 ]);
 exports.SequelizeMap = (() => {
     let ret = {};
-    ret[DBTypes.Tinyint] = 'INTEGER';
+    ret[DBTypes.Tinyint] = 'INTEGER(1)';
     ret[DBTypes.Smallint] = 'INTEGER';
     ret[DBTypes.Int] = 'INTEGER';
     ret[DBTypes.Integer] = 'INTEGER';
