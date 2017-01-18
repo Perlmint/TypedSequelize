@@ -9,12 +9,13 @@ export function internal() {
 // first one is default type
 export enum DBTypes {
     // boolean
-    Tinyint,
+    Boolean,
 
     // number
     Int,
     Smallint,
     Integer,
+    Tinyint,
     Mediumint,
     Bigint,
     Year,
@@ -54,17 +55,18 @@ export const DefaultDBType: Map<string, DBTypes> = new Map([
     ["number", DBTypes.Int],
     ["Date", DBTypes.Datetime],
     ["Buffer", DBTypes.Blob],
-    ["boolean", DBTypes.Tinyint]
+    ["boolean", DBTypes.Boolean]
 ]);
 
 export var SequelizeMap: {[key:number]:string} = (() => {
     let ret: {[key:number]:string} = {};
 
-    ret[DBTypes.Tinyint] = 'INTEGER(1)';
-
+    ret[DBTypes.Boolean] = 'BOOLEAN';
+    
     ret[DBTypes.Smallint] = 'INTEGER';
     ret[DBTypes.Int] = 'INTEGER';
     ret[DBTypes.Integer] = 'INTEGER';
+    ret[DBTypes.Tinyint] = 'INTEGER(1)';
     ret[DBTypes.Mediumint] = 'INTEGER';
     ret[DBTypes.Bigint] = 'BIGINT';
     ret[DBTypes.Year] = 'INTEGER';
