@@ -92,7 +92,7 @@ function writeInterface(stream: WriteStream, interf: Interface, name: string) {
 function writeModelDef(stream: WriteStream, interf: Interface, name: string) {
     stream.write(`export interface ${name}Instance extends sequelize.Instance<${name}Interface>, ${name}Interface {`);
     _.forEach(interf.relationships, (rel) => {
-        const capitalizedName = _.capitalize(rel.name);
+        const capitalizedName = _.upperFirst(rel.name);
         const typeName = rel.targetName + "Interface";
         switch(rel.type) {
         case RelationshipType.OneToMany:

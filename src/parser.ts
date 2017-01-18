@@ -33,7 +33,7 @@ function getDecoratorArgs(decorator: ts.Decorator): ts.Expression[] {
 
 export function parse(fileName: string): ParsedInfo {
     let program = ts.createProgram([fileName], {
-        target: ts.ScriptTarget.ES6
+        target: ts.ScriptTarget.ES2015
     });
     var source = program.getSourceFile(fileName); //ts.createSourceFile(fileName, readFileSync(fileName).toString(), ts.ScriptTarget.ES5, true);
     var typeChecker = program.getTypeChecker();
@@ -158,7 +158,7 @@ export function parse(fileName: string): ParsedInfo {
             arrayJoinedWith: null,
             associated: null
         };
-        if (decl.kind == ts.SyntaxKind.MethodDeclaration) {
+        if (decl.kind != ts.SyntaxKind.PropertyDeclaration) {
             return;
         }
         var decorators = decl.decorators;

@@ -2,7 +2,7 @@
   "dependencies": {},
   "globalDependencies": {
     "argparse": "registry:dt/argparse#1.0.3+20160316155526",
-    "lodash": "registry:dt/lodash#3.10.0+20160619033623",
+    "lodash": "github:Perlmint/DefinitelyTyped/lodash/lodash.d.ts#65449b5d8e093124600991a0ee77db57bb3c8237",
     "node": "registry:env/node#4.0.0+20160507210304"
   }
 }
