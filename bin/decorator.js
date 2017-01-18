@@ -6,6 +6,7 @@ function internal() {
 }
 exports.internal = internal;
 // first one is default type
+var DBTypes;
 (function (DBTypes) {
     // boolean
     DBTypes[DBTypes["Tinyint"] = 0] = "Tinyint";
@@ -42,8 +43,7 @@ exports.internal = internal;
     DBTypes[DBTypes["Set"] = 27] = "Set";
     DBTypes[DBTypes["Time"] = 28] = "Time";
     DBTypes[DBTypes["Geometry"] = 29] = "Geometry";
-})(exports.DBTypes || (exports.DBTypes = {}));
-var DBTypes = exports.DBTypes;
+})(DBTypes = exports.DBTypes || (exports.DBTypes = {}));
 exports.DefaultDBType = new Map([
     ["string", DBTypes.Varchar],
     ["number", DBTypes.Int],

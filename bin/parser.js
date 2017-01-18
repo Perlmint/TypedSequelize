@@ -29,7 +29,7 @@ function getDecoratorArgs(decorator) {
 }
 function parse(fileName) {
     let program = ts.createProgram([fileName], {
-        target: ts.ScriptTarget.ES6
+        target: ts.ScriptTarget.ES2015
     });
     var source = program.getSourceFile(fileName); //ts.createSourceFile(fileName, readFileSync(fileName).toString(), ts.ScriptTarget.ES5, true);
     var typeChecker = program.getTypeChecker();
@@ -140,7 +140,7 @@ function parse(fileName) {
             arrayJoinedWith: null,
             associated: null
         };
-        if (decl.kind == ts.SyntaxKind.MethodDeclaration) {
+        if (decl.kind != ts.SyntaxKind.PropertyDeclaration) {
             return;
         }
         var decorators = decl.decorators;
