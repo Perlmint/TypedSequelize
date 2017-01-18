@@ -9,54 +9,56 @@ exports.internal = internal;
 var DBTypes;
 (function (DBTypes) {
     // boolean
-    DBTypes[DBTypes["Tinyint"] = 0] = "Tinyint";
+    DBTypes[DBTypes["Boolean"] = 0] = "Boolean";
     // number
     DBTypes[DBTypes["Int"] = 1] = "Int";
     DBTypes[DBTypes["Smallint"] = 2] = "Smallint";
     DBTypes[DBTypes["Integer"] = 3] = "Integer";
-    DBTypes[DBTypes["Mediumint"] = 4] = "Mediumint";
-    DBTypes[DBTypes["Bigint"] = 5] = "Bigint";
-    DBTypes[DBTypes["Year"] = 6] = "Year";
-    DBTypes[DBTypes["Float"] = 7] = "Float";
-    DBTypes[DBTypes["Double"] = 8] = "Double";
-    DBTypes[DBTypes["Decimal"] = 9] = "Decimal";
+    DBTypes[DBTypes["Tinyint"] = 4] = "Tinyint";
+    DBTypes[DBTypes["Mediumint"] = 5] = "Mediumint";
+    DBTypes[DBTypes["Bigint"] = 6] = "Bigint";
+    DBTypes[DBTypes["Year"] = 7] = "Year";
+    DBTypes[DBTypes["Float"] = 8] = "Float";
+    DBTypes[DBTypes["Double"] = 9] = "Double";
+    DBTypes[DBTypes["Decimal"] = 10] = "Decimal";
     // Date
-    DBTypes[DBTypes["Datetime"] = 10] = "Datetime";
-    DBTypes[DBTypes["Timestamp"] = 11] = "Timestamp";
-    DBTypes[DBTypes["Date"] = 12] = "Date";
+    DBTypes[DBTypes["Datetime"] = 11] = "Datetime";
+    DBTypes[DBTypes["Timestamp"] = 12] = "Timestamp";
+    DBTypes[DBTypes["Date"] = 13] = "Date";
     // Buffer
-    DBTypes[DBTypes["Blob"] = 13] = "Blob";
-    DBTypes[DBTypes["Tinyblob"] = 14] = "Tinyblob";
-    DBTypes[DBTypes["Mediumblob"] = 15] = "Mediumblob";
-    DBTypes[DBTypes["Longblob"] = 16] = "Longblob";
-    DBTypes[DBTypes["Binary"] = 17] = "Binary";
-    DBTypes[DBTypes["Varbinary"] = 18] = "Varbinary";
-    DBTypes[DBTypes["Bit"] = 19] = "Bit";
+    DBTypes[DBTypes["Blob"] = 14] = "Blob";
+    DBTypes[DBTypes["Tinyblob"] = 15] = "Tinyblob";
+    DBTypes[DBTypes["Mediumblob"] = 16] = "Mediumblob";
+    DBTypes[DBTypes["Longblob"] = 17] = "Longblob";
+    DBTypes[DBTypes["Binary"] = 18] = "Binary";
+    DBTypes[DBTypes["Varbinary"] = 19] = "Varbinary";
+    DBTypes[DBTypes["Bit"] = 20] = "Bit";
     // String
-    DBTypes[DBTypes["Varchar"] = 20] = "Varchar";
-    DBTypes[DBTypes["Char"] = 21] = "Char";
-    DBTypes[DBTypes["Tinytext"] = 22] = "Tinytext";
-    DBTypes[DBTypes["Mediumtext"] = 23] = "Mediumtext";
-    DBTypes[DBTypes["Longtext"] = 24] = "Longtext";
-    DBTypes[DBTypes["Text"] = 25] = "Text";
-    DBTypes[DBTypes["Enum"] = 26] = "Enum";
-    DBTypes[DBTypes["Set"] = 27] = "Set";
-    DBTypes[DBTypes["Time"] = 28] = "Time";
-    DBTypes[DBTypes["Geometry"] = 29] = "Geometry";
+    DBTypes[DBTypes["Varchar"] = 21] = "Varchar";
+    DBTypes[DBTypes["Char"] = 22] = "Char";
+    DBTypes[DBTypes["Tinytext"] = 23] = "Tinytext";
+    DBTypes[DBTypes["Mediumtext"] = 24] = "Mediumtext";
+    DBTypes[DBTypes["Longtext"] = 25] = "Longtext";
+    DBTypes[DBTypes["Text"] = 26] = "Text";
+    DBTypes[DBTypes["Enum"] = 27] = "Enum";
+    DBTypes[DBTypes["Set"] = 28] = "Set";
+    DBTypes[DBTypes["Time"] = 29] = "Time";
+    DBTypes[DBTypes["Geometry"] = 30] = "Geometry";
 })(DBTypes = exports.DBTypes || (exports.DBTypes = {}));
 exports.DefaultDBType = new Map([
     ["string", DBTypes.Varchar],
     ["number", DBTypes.Int],
     ["Date", DBTypes.Datetime],
     ["Buffer", DBTypes.Blob],
-    ["boolean", DBTypes.Tinyint]
+    ["boolean", DBTypes.Boolean]
 ]);
 exports.SequelizeMap = (() => {
     let ret = {};
-    ret[DBTypes.Tinyint] = 'INTEGER(1)';
+    ret[DBTypes.Boolean] = 'BOOLEAN';
     ret[DBTypes.Smallint] = 'INTEGER';
     ret[DBTypes.Int] = 'INTEGER';
     ret[DBTypes.Integer] = 'INTEGER';
+    ret[DBTypes.Tinyint] = 'INTEGER(1)';
     ret[DBTypes.Mediumint] = 'INTEGER';
     ret[DBTypes.Bigint] = 'BIGINT';
     ret[DBTypes.Year] = 'INTEGER';
