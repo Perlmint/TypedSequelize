@@ -14,10 +14,11 @@ function makeProperty(prop, prefix = "") {
     let propDef = `    '${name}': {
       type: sequelize.`;
     let getter = null, setter = null, concreteType;
+    const typename = util_1.tsTypeToString(prop.tsType, prop.option.associated !== null);
     if (prop.option.embeded !== null) {
         propDef = _.map(prop.option.embeded, (embeded) => makeProperty(embeded, name)).concat(propDef).join(",\n");
         concreteType = "VIRTUAL";
-        getter = "        return {\n" + _.map(prop.option.embeded, (embeded) => `          '${embeded.name}': this.get('${name}_${embeded.name}')`).join(",\n") + "\n        };";
+        getter = `        const ret = new ${typename}();\n` + _.map(prop.option.embeded, (embeded) => `        ret.${embeded.name} = this.get('${name}_${embeded.name}')`).join(";\n") + "\n        return ret;";
         setter = _.map(prop.option.embeded, (embeded) => `        this.setDataValue('${name}_${embeded.name}', val.${embeded.name});`).join("\n");
     }
     else if (prop.option.arrayJoinedWith !== null) {
@@ -35,7 +36,6 @@ function makeProperty(prop, prefix = "") {
     if (prop.option.primaryKey) {
         propDef += ",\n      primaryKey: true";
     }
-    const typename = util_1.tsTypeToString(prop.tsType, prop.option.associated !== null);
     if (getter !== null) {
         propDef += `,
       get: function(): ${typename} {
