@@ -1,5 +1,5 @@
 "use strict";
-/// <reference path="../typings/index.d.ts" />
+Object.defineProperty(exports, "__esModule", { value: true });
 const ts = require("typescript");
 function tsTypeToString(t, associated = false) {
     var typename = _tsTypeToString(t);
@@ -31,3 +31,4 @@ function _tsTypeToString(t) {
             return t.getSymbol().name;
     }
 }
+//# sourceMappingURL=util.js.map

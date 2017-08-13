@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var RelationshipType;
 (function (RelationshipType) {
     RelationshipType[RelationshipType["OneToMany"] = 0] = "OneToMany";
@@ -7,3 +8,4 @@ var RelationshipType;
 })(RelationshipType = exports.RelationshipType || (exports.RelationshipType = {}));
 ;
 ;
+//# sourceMappingURL=types.js.map

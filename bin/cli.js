@@ -1,5 +1,5 @@
-/// <reference path="../typings/index.d.ts" />
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const fs_1 = require("fs");
 const path_1 = require("path");
 const argparse_1 = require("argparse");
@@ -103,6 +103,7 @@ else {
         _.assign(interfaces, parsed.interfaces);
         interfacesByFile[srcAbsPath] = parsed;
     });
+    let targetUseTypings = fs_1.existsSync(path_1.join(args.rootdir, "typings.json"));
     _.forEach(interfacesByFile, (v, k) => {
         const basefilename = path_1.basename(k, ".ts");
         const outName = `${basefilename}_models`;
@@ -114,7 +115,9 @@ else {
             outTypesStream: fs_1.createWriteStream(path_1.join(args.outdir, `${outTypesName}.ts`)),
             outTypesName: outTypesName,
             rootDir: args.rootdir,
-            srcPath: k
+            srcPath: k,
+            targetUseTypings
         });
     });
 }
+//# sourceMappingURL=cli.js.map

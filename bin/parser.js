@@ -1,5 +1,5 @@
 "use strict";
-/// <reference path="../typings/index.d.ts" />
+Object.defineProperty(exports, "__esModule", { value: true });
 const ts = require("typescript");
 const decorator_1 = require("./decorator");
 const _ = require("lodash");
@@ -224,7 +224,7 @@ function parse(fileName) {
                     });
                 }
             }
-            else if (propType.flags & ts.TypeFlags.Enum) {
+            else if (propType.flags & ts.TypeFlags.Enum || propType.flags & ts.TypeFlags.EnumLiteral) {
                 ret.concreteType = decorator_1.DBTypes.Int;
             }
         }
@@ -251,3 +251,4 @@ function parse(fileName) {
     };
 }
 exports.parse = parse;
+//# sourceMappingURL=parser.js.map

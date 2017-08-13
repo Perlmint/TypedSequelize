@@ -1,5 +1,5 @@
-/// <reference path="../typings/index.d.ts" />
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 require("reflect-metadata");
 function internal() {
     return Reflect.metadata("internal", true);
@@ -123,3 +123,4 @@ function index(name, uniq) {
     return Reflect.metadata("Index", name);
 }
 exports.index = index;
+//# sourceMappingURL=decorator.js.map

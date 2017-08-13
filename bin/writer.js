@@ -1,5 +1,5 @@
 "use strict";
-/// <reference path="../typings/index.d.ts" />
+Object.defineProperty(exports, "__esModule", { value: true });
 const types_1 = require("./types");
 const path_1 = require("path");
 const util_1 = require("./util");
@@ -143,10 +143,12 @@ function writeModelDef(stream, interf, name) {
 }
 function writeModel(info, writeInfo) {
     const stream = writeInfo.outStream;
-    // write typings reference
-    const typingsPath = path_1.relative(writeInfo.outDir, path_1.join(writeInfo.rootDir, "typings/index.d.ts"))
-        .replace(new RegExp("\\\\", "g"), "/");
-    stream.write(`/// <reference path="${typingsPath}" />\n\n`);
+    if (writeInfo.targetUseTypings) {
+        // write typings reference
+        const typingsPath = path_1.relative(writeInfo.outDir, path_1.join(writeInfo.rootDir, "typings/index.d.ts"))
+            .replace(new RegExp("\\\\", "g"), "/");
+        stream.write(`/// <reference path="${typingsPath}" />\n\n`);
+    }
     // write dependency - sequelize
     stream.write("import * as sequelize from 'sequelize';\n\n");
     // write dependencies - user defined types
@@ -199,3 +201,4 @@ import { ${joinedItems} } from '${moduleName}_types';`;
     stream.write("};");
 }
 exports.writeModel = writeModel;
+//# sourceMappingURL=writer.js.map
