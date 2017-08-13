@@ -1,11 +1,11 @@
 import {readFileSync, createWriteStream, mkdirSync, accessSync} from "fs";
-import {basename, join, relative, sep, normalize,
-        parse as parsePath, isAbsolute, dirname} from "path";
+import {basename, join, normalize,
+        parse as parsePath, isAbsolute} from "path";
 import * as ts from "typescript";
 import {ArgumentParser} from "argparse";
 import * as _ from "lodash";
 import {parse} from "./parser";
-import {writeModel, IWriteInfo} from "./writer";
+import {writeModel} from "./writer";
 import {InterfaceMap, ParsedInfo} from "./types";
 
 interface IOptions {

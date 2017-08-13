@@ -1,6 +1,7 @@
 *.*~
 node_modules
 example
-typings
+src
 .gitignore
-.gitattribute
+.gitattributes
+tsconfig.json

@@ -2,18 +2,17 @@
     "compilerOptions": {
         "module": "commonjs",
         "target": "es6",
-        "noImplicitAny": false,
-        "sourceMap": false,
+        "noImplicitAny": true,
+        "allowJs": false,
+        "noUnusedLocals": true,
+        "sourceMap": true,
+        "declaration": true,
         "outDir": "bin",
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "rootDir": "src"
     },
-    "exclude": [
-        "node_modules",
-        "typings",
-        "example",
-        "out",
-        "index.ts"
+    "include": [
+        "src/**/*.*"
     ]
 }

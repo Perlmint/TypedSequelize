@@ -2,7 +2,8 @@
   "name": "typedsequelize",
   "version": "0.4.9",
   "description": "typescript source generator for sequelize &amp; rpc",
-  "main": "./bin/cli.js",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
   "bin": {
     "typedsequelize": "./bin/typedsequelize"
   },

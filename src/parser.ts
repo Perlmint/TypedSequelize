@@ -1,8 +1,8 @@
 import * as ts from "typescript";
-import {DBTypes, SequelizeMap, DefaultDBType} from "./decorator";
+import {DBTypes, DefaultDBType} from "./decorator";
 import * as _ from "lodash";
-import {InterfaceMap, ParsedInfo, Property, PropertyOption, Interface,
-        RelationshipType, Relationship, IndexInfo} from "./types";
+import {InterfaceMap, ParsedInfo, PropertyOption, Interface,
+        RelationshipType, Relationship} from "./types";
 import {tsTypeToString} from "./util";
 
 function getDecoratorName(decorator: ts.Decorator): string {
@@ -132,7 +132,7 @@ export function parse(fileName: string): ParsedInfo {
                 ret.internal = true;
                 break;
             case "concreteType":
-                ret.concreteType = DBTypes[(<ts.PropertyAccessExpression>args[0]).name.text];
+                ret.concreteType = DBTypes[(args[0] as ts.PropertyAccessExpression).name.text as keyof typeof DBTypes];
                 break;
             case "embededField":
                 ret.embeded = [];
