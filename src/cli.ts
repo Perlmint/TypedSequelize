@@ -1,5 +1,3 @@
-/// <reference path="../typings/index.d.ts" />
-
 import {readFileSync, createWriteStream, mkdirSync, accessSync} from "fs";
 import {basename, join, relative, sep, normalize,
         parse as parsePath, isAbsolute, dirname} from "path";

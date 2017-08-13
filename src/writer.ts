@@ -1,4 +1,3 @@
-/// <reference path="../typings/index.d.ts" />
 import {ParsedInfo, Interface, Property, RelationshipType, Relationship} from "./types";
 import {ParsedPath, relative, join, dirname} from "path";
 import {WriteStream} from "fs";

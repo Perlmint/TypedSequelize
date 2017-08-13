@@ -1,4 +1,3 @@
-/// <reference path="../typings/index.d.ts" />
 import * as ts from "typescript";
 import {DBTypes} from "./decorator";
 

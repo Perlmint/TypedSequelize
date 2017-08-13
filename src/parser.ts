@@ -1,4 +1,3 @@
-/// <reference path="../typings/index.d.ts" />
 import * as ts from "typescript";
 import {DBTypes, SequelizeMap, DefaultDBType} from "./decorator";
 import * as _ from "lodash";
