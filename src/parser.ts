@@ -243,7 +243,7 @@ export function parse(fileName: string): ParsedInfo {
                         tsType: info[1]
                     });
                 }
-            } else if (propType.flags & ts.TypeFlags.Enum) {
+            } else if (propType.flags & ts.TypeFlags.Enum || propType.flags & ts.TypeFlags.EnumLiteral) {
                 ret.concreteType = DBTypes.Int;
             }
         }
