@@ -1,6 +1,5 @@
-/// <reference path="../typings/index.d.ts" />
 import {ParsedInfo, Interface, Property, RelationshipType, Relationship} from "./types";
-import {ParsedPath, relative, join, dirname} from "path";
+import {relative, join, dirname} from "path";
 import {WriteStream} from "fs";
 import {tsTypeToString} from "./util";
 import {SequelizeMap} from "./decorator";
@@ -14,6 +13,7 @@ export interface IWriteInfo {
     outName: string;
     outTypesStream: WriteStream;
     outTypesName: string;
+    targetUseTypings: boolean;
 };
 
 function makeProperty(prop: Property, prefix: string = ""): string {
@@ -165,12 +165,14 @@ function writeModelDef(stream: WriteStream, interf: Interface, name: string) {
 export function writeModel(info: ParsedInfo, writeInfo: IWriteInfo) {
     const stream = writeInfo.outStream;
 
-    // write typings reference
-    const typingsPath = relative(writeInfo.outDir,
-            join(writeInfo.rootDir,
-                "typings/index.d.ts"))
-        .replace(new RegExp("\\\\", "g"), "/");
-    stream.write(`/// <reference path="${typingsPath}" />\n\n`);
+    if (writeInfo.targetUseTypings) {
+        // write typings reference
+        const typingsPath = relative(writeInfo.outDir,
+                join(writeInfo.rootDir,
+                    "typings/index.d.ts"))
+            .replace(new RegExp("\\\\", "g"), "/");
+        stream.write(`/// <reference path="${typingsPath}" />\n\n`);
+    }
 
     // write dependency - sequelize
     stream.write("import * as sequelize from 'sequelize';\n\n");

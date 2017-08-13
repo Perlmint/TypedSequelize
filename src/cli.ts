@@ -1,13 +1,11 @@
-/// <reference path="../typings/index.d.ts" />
-
-import {readFileSync, createWriteStream, mkdirSync, accessSync} from "fs";
-import {basename, join, relative, sep, normalize,
-        parse as parsePath, isAbsolute, dirname} from "path";
+import {readFileSync, createWriteStream, mkdirSync, accessSync, existsSync} from "fs";
+import {basename, join, normalize,
+        parse as parsePath, isAbsolute} from "path";
 import * as ts from "typescript";
 import {ArgumentParser} from "argparse";
 import * as _ from "lodash";
 import {parse} from "./parser";
-import {writeModel, IWriteInfo} from "./writer";
+import {writeModel} from "./writer";
 import {InterfaceMap, ParsedInfo} from "./types";
 
 interface IOptions {
@@ -138,6 +136,8 @@ if (args.watch) {
         _.assign(interfaces, parsed.interfaces);
         interfacesByFile[srcAbsPath] = parsed;
     });
+    let targetUseTypings = existsSync(join(args.rootdir, "typings.json"));
+
     _.forEach(interfacesByFile, (v, k) => {
         const basefilename = basename(k, ".ts");
         const outName = `${basefilename}_models`;
@@ -149,7 +149,8 @@ if (args.watch) {
             outTypesStream: createWriteStream(join(args.outdir, `${outTypesName}.ts`)),
             outTypesName: outTypesName,
             rootDir: args.rootdir,
-            srcPath: k
+            srcPath: k,
+            targetUseTypings
         });
     });
 }

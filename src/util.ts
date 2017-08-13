@@ -1,4 +1,3 @@
-/// <reference path="../typings/index.d.ts" />
 import * as ts from "typescript";
 
 export function tsTypeToString(t: ts.Type, associated: boolean = false) : string {
